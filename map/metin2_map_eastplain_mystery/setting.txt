@@ -1,0 +1,13 @@
+ScriptType	MapSetting
+
+CellScale	200
+HeightScale	0.500000
+
+ViewRadius	128
+
+MapSize	3	3
+BasePosition	768000	1280000
+TextureSet	textureset\metin2_map_anglar_dungeon_01.txt
+Environment	metin2_map_eastplain_mystery.msenv
+terrainvisible	0
+
