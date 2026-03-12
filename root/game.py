@@ -1506,7 +1506,8 @@ class GameWindow(ui.ScriptWindow):
 		player.SetSingleDIKKeyState(app.DIK_RIGHT, False)
 
 	def PickUpItem(self):
-		player.PickCloseItem()
+		player.PickCloseItemVector()
+
 
 	###############################################################################################
 	###############################################################################################
@@ -1519,6 +1520,10 @@ class GameWindow(ui.ScriptWindow):
 		if app.ENABLE_POPUP_NOTICE:
 			if self.interface.wndPopupNotice and self.interface.wndPopupNotice.IsShow():
 				return
+
+		if key == app.DIK_Z or key == app.DIK_GRAVE:
+			self.PickUpItem()
+			return True
 
 		if key == app.DIK_ESC:
 			self.RequestDropItem(False)
