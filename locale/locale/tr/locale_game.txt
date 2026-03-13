@@ -2934,6 +2934,7 @@ TOOLTIP_AFFECT_IRON_DRAGON_BLESS	%%10 hasar düþüþü için kalan dolumlar: %d
 TOOLTIP_AFFECT_LATE_SUMMER_EVENT_BUFF	Ruhlar (%d/20)	SA
 TOOLTIP_AFFECT_LATE_SUMMER_EVENT_PRIMIUM_BUFF	Kýymetli Ruhlar (%d/150)	SA
 TOOLTIP_AFFECT_LOOTING_SYSTEM	Yaðma kartý	SNA
+TOOLTIP_AFFECT_COMFORT_PACKAGE	Konfor Paketi\n\n- Otomatik eþya toplama\n- Yaðma kartý filtresiyle uyumlu çalýþma\n\n[Sýnýrsýz]
 TOOLTIP_AFFECT_MERCENARY_MAX_ACTIVE_INCREASE	Maksimum dayanýklýlýðý +%d artýrýr	SA
 TOOLTIP_AFFECT_MI_BUFF	Ýþgal Buffý \n%s
 TOOLTIP_AFFECT_MOUNT_FALL	Binekten düþüþ	SNA

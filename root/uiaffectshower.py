@@ -632,6 +632,7 @@ class AffectShower(ui.Window):
 
 	AFFECT_DATA_DICT[chr.NEW_AFFECT_RESEARCHER_ELIXIR] = (localeInfo.TOOLTIP_AFFECT_RESEARCHER_ELIXIR, "d:/ymir work/ui/skill/common/affect/researcher_elixir.sub")
 	AFFECT_DATA_DICT[chr.NEW_AFFECT_SAFE_BOX_BUFF] = (localeInfo.TOOLTIP_AFFECT_SAFEBOX_BUFF_01, "d:/ymir work/ui/skill/common/affect/safebox_buff.sub")
+	AFFECT_DATA_DICT[chr.NEW_AFFECT_COMFORT_PACKAGE] = (lambda x: localeInfo.TOOLTIP_AFFECT_COMFORT_PACKAGE, "d:/ymir work/ui/affect/comfort_package.tga")
 
 	if app.ENABLE_FISHING_GAME:
 		AFFECT_DATA_DICT[chr.AFFECT_FISHING_GOLD_TUNA] = (localeInfo.TOOLTIP_AFFECT_FISHING_GOLD_TUNA, "d:/ymir work/ui/skill/common/affect/fishing_gold_tuna_buff.sub")
@@ -639,6 +640,7 @@ class AffectShower(ui.Window):
 
 	if app.ENABLE_LOOTING_SYSTEM and app.ENABLE_PREMIUM_LOOTING:
 		AFFECT_DATA_DICT[chr.NEW_AFFECT_LOOTING_SYSTEM] = (localeInfo.TOOLTIP_AFFECT_LOOTING_SYSTEM, "d:/ymir work/ui/skill/common/affect/looting_system.sub")
+
 
 	if app.ENABLE_CONQUEROR_LEVEL:
 		AFFECT_DATA_DICT[chr.NEW_AFFECT_SKILL_9_CHEONUN] = (localeInfo.TOOLTIP_AFFECT_CHEONUN, "d:/ymir work/ui/skill/shaman/cheonun_03.sub")
@@ -753,7 +755,8 @@ class AffectShower(ui.Window):
 		   affect == chr.NEW_AFFECT_SKILL_BOOK_BONUS or\
 		   affect == chr.NEW_AFFECT_AUTO_SP_RECOVERY or\
 		   affect == chr.NEW_AFFECT_AUTO_HP_RECOVERY or\
-		   affect == chr.NEW_AFFECT_SKILL_BOOK_NO_DELAY:
+		   affect == chr.NEW_AFFECT_SKILL_BOOK_NO_DELAY or\
+		   affect == chr.NEW_AFFECT_COMFORT_PACKAGE:
 			duration = 0
 
 		affectData = self.AFFECT_DATA_DICT[affect]
@@ -810,6 +813,7 @@ class AffectShower(ui.Window):
 
 			elif affect == chr.NEW_AFFECT_EXP_BONUS_EURO_FREE or\
 				affect == chr.NEW_AFFECT_EXP_BONUS_EURO_FREE_UNDER_15 or\
+				affect == chr.NEW_AFFECT_COMFORT_PACKAGE or\
 				self.INFINITE_AFFECT_DURATION < duration:
 				image.SetClock(False)
 				image.UpdateDescription()
