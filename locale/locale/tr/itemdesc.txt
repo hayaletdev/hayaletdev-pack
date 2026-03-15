@@ -7851,6 +7851,7 @@
 165200	Mitsi ejderha oniksi	
 165300	Mitsi ejderha oniksi	
 165400	Mitsi ejderha oniksi	
+175401	Premium Konfor Paketi
 711151	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.
 711152	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.
 711153	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.

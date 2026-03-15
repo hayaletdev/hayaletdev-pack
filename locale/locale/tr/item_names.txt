@@ -11129,7 +11129,7 @@ VNUM	LOCALE_NAME
 86064	Kalp kuþaðý (kiþiye öz.)
 89999	Aura belgesi+
 90000	Dönüþüm Belgesi
-90010	Temel Taþý
+90010	Temel Taþýidu
 90011	Gövde
 90012	Kontrplak
 90013	NoNAme
@@ -11416,3 +11416,4 @@ VNUM	LOCALE_NAME
 175200	Mitsi ejderha ametisti
 175300	Mitsi ejderha ametisti
 175400	Mitsi ejderha ametisti
+175401  Premium Konfor Paketi

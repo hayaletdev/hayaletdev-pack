@@ -11846,6 +11846,7 @@
 175200	ETC	icon/item/175200.tga
 175300	ETC	icon/item/175300.tga
 175400	ETC	icon/item/175400.tga
+175401	ETC	icon/item/175401.tga
 711151	ETC	icon/item/71119.tga
 711152	ETC	icon/item/71119.tga
 711153	ETC	icon/item/71119.tga
