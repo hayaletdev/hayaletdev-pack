@@ -632,7 +632,7 @@ class AffectShower(ui.Window):
 
 	AFFECT_DATA_DICT[chr.NEW_AFFECT_RESEARCHER_ELIXIR] = (localeInfo.TOOLTIP_AFFECT_RESEARCHER_ELIXIR, "d:/ymir work/ui/skill/common/affect/researcher_elixir.sub")
 	AFFECT_DATA_DICT[chr.NEW_AFFECT_SAFE_BOX_BUFF] = (localeInfo.TOOLTIP_AFFECT_SAFEBOX_BUFF_01, "d:/ymir work/ui/skill/common/affect/safebox_buff.sub")
-	AFFECT_DATA_DICT[chr.NEW_AFFECT_COMFORT_PACKAGE] = (lambda x: localeInfo.TOOLTIP_AFFECT_COMFORT_PACKAGE, "d:/ymir work/ui/affect/comfort_package.tga")
+	AFFECT_DATA_DICT[chr.NEW_AFFECT_COMFORT_PACKAGE] = (lambda x: localeInfo.TOOLTIP_AFFECT_COMFORT_PACKAGE, "d:/ymir work/ui/affect/premium.png")
 
 	if app.ENABLE_FISHING_GAME:
 		AFFECT_DATA_DICT[chr.AFFECT_FISHING_GOLD_TUNA] = (localeInfo.TOOLTIP_AFFECT_FISHING_GOLD_TUNA, "d:/ymir work/ui/skill/common/affect/fishing_gold_tuna_buff.sub")
