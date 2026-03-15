@@ -11415,5 +11415,5 @@ VNUM	LOCALE_NAME
 175100	Mitsi ejderha ametisti
 175200	Mitsi ejderha ametisti
 175300	Mitsi ejderha ametisti
-175400	Mitsi ejderha ametisti
+175400  Mitsi ejderha ametisti
 175401  Premium Konfor Paketi
