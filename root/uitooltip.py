@@ -2329,14 +2329,17 @@ class ItemToolTip(ToolTip):
 						bHasRealtimeFlag = 1
 
 				if 1 == bHasRealtimeFlag:
-					self.AppendMallItemLastTime(metinSlot[0])
+					if metinSlot[0] > 0:
+						self.AppendMallItemLastTime(metinSlot[0])
 				else:
 					time = metinSlot[player.ITEM_METIN_SOCKET_MAX - 1] # METIN_SOCKET_MAX_NUM
 
 					if 1 == item.GetValue(2): ## 실시간 이용 Flag / 장착 안해도 준다
-						self.AppendMallItemLastTime(time)
+						if time > 0:
+							self.AppendMallItemLastTime(time)
 					else:
-						self.AppendUniqueItemLastTime(time)
+						if time > 0:
+							self.AppendUniqueItemLastTime(time)
 
 		### Use ###
 		elif item.ITEM_TYPE_USE == itemType:

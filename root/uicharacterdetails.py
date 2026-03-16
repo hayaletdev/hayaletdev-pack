@@ -72,6 +72,8 @@ class CharacterDetailsUI(ui.ScriptWindow):
 		## 추가 데미지
 		self.InfoList.append([localeInfo.DETAILS_CATE_1, "", self.CATEGORY_STARTLINE])
 		self.InfoList.append([localeInfo.DETAILS_0, localeInfo.DETAILS_TOOLTIP_0, item.GetApplyPoint(item.APPLY_ATTBONUS_STONE)])
+		self.InfoList.append([localeInfo.DETAILS_80, localeInfo.DETAILS_TOOLTIP_80, item.GetApplyPoint(item.APPLY_NORMAL_HIT_DAMAGE_BONUS_BOSS_OR_MORE)])
+		self.InfoList.append([localeInfo.DETAILS_5, localeInfo.DETAILS_TOOLTIP_5, item.GetApplyPoint(item.APPLY_ATTBONUS_MONSTER)])
 		self.InfoList.append([localeInfo.DETAILS_1, localeInfo.DETAILS_TOOLTIP_1, item.GetApplyPoint(item.APPLY_ATTBONUS_HUMAN)])
 
 		if app.ENABLE_ELEMENT_ADD: # ENABLE_PVP_BALANCE
@@ -79,7 +81,6 @@ class CharacterDetailsUI(ui.ScriptWindow):
 
 		self.InfoList.append([localeInfo.DETAILS_3, localeInfo.DETAILS_TOOLTIP_3, item.GetApplyPoint(item.APPLY_ATTBONUS_ORC)])
 		self.InfoList.append([localeInfo.DETAILS_4, localeInfo.DETAILS_TOOLTIP_4, item.GetApplyPoint(item.APPLY_ATTBONUS_UNDEAD)])
-		self.InfoList.append([localeInfo.DETAILS_5, localeInfo.DETAILS_TOOLTIP_5, item.GetApplyPoint(item.APPLY_ATTBONUS_MONSTER)])
 		if app.ENABLE_ELEMENT_ADD:
 			self.InfoList.append([localeInfo.DETAILS_6, localeInfo.DETAILS_TOOLTIP_6, item.GetApplyPoint(item.APPLY_ATTBONUS_CZ)])
 		self.InfoList.append([localeInfo.DETAILS_7, localeInfo.DETAILS_TOOLTIP_7, item.GetApplyPoint(item.APPLY_ATTBONUS_ANIMAL)])

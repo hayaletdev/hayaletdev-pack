@@ -10795,7 +10795,7 @@ VNUM	LOCALE_NAME
 76045	Pet Ýsmi Parþömeni
 76047	Güç lolipopu (3 g)
 76051	Sýrlar yüzüðü (7g)
-76052	Rüzgar ayakkabýlarý (7g)
+76052	Rüzgar ayakkabýlarý
 76053	Üçüncü el (3g)
 76054	Duygu maskesi (7g)
 76055	Ekstra ekipman say. (t)

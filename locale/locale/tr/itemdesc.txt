@@ -7281,7 +7281,7 @@
 76046	Efsun Nesnesi+	Nesnelerinden birinin bonuslarýný siler ve yenilerini ekler. Yeni bonuslar sana öncesinde gösterilir. Ardýndan, gösterilen bonuslarý isteyip istemediðine karar verebilirsin.
 76047	Güç lolipopu (3 g)	Gizli malzemelerden oluþan lolipop sana 3 gün boyunca | +%50 tecrübe puaný | +20 saldýrý hýzý | +20 sihir hýzý | +%10 canavarlara karþý güçlü | +%10 maksimum HP | +%10 maksimum SP saðlar
 76051	Sýrlar yüzüðü (7g)	7 gün boyunca canavar avýnda tecrübe puaný toplamayý engeller.
-76052	Rüzgar ayakkabýlarý (7g)	Bu ayakkabýlarý giydiðinde hareket hýzýný 7 gün boyunca 30 oranýnda artýrýr.
+76052	Rüzgar ayakkabýlarý	Bu ayakkabýlarý giydiðinde hareket hýzýný 30 oranýnda artýrýr.
 76053	Üçüncü el (3g)	3 gün boyunca otomatik olarak Yang toplayan bir el
 76054	Duygu maskesi (7g)	Bu maske ile 7 gün boyunca duygularýný gösterebilirsin.
 76055	Ekstra ekipman say. (t)	Ekipman sayfasýný çevirerek 2 farklý ekipman seti taþýyabilirsin. | Ýlgili yeteneði ikincil becerilerde bulabilirsin. | Eþyanýn ticareti yapýlabilir.
@@ -7851,7 +7851,7 @@
 165200	Mitsi ejderha oniksi	
 165300	Mitsi ejderha oniksi	
 165400	Mitsi ejderha oniksi	
-175401	Premium Konfor Paketi
+175401	Ejderha alevi	Ýlahi alev ile efsanevi ejderha taþýnýn bonuslarýný deðiþtirebilirsin. Gereken alev sayýsý, taþýnýn saflýk derecesine baðlýdýr. Bunun için simyacýya git.
 711151	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.
 711152	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.
 711153	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.

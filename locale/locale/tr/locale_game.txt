@@ -482,6 +482,7 @@ DETAILS_76	Büyüye karþý direnç
 DETAILS_77	Büyü bozma
 DETAILS_78	Canavara krþ. drnç.
 DETAILS_79	Büyülü saldý. bonusu
+DETAILS_80	Patronlara karþý güçlü
 DETAILS_ATTBONUS_BELL	Çanýn Kýrýlmasý
 DETAILS_ATTBONUS_BOW	Okun Kýrýlmasý
 DETAILS_ATTBONUS_CLAW	Pençenin Kýrýlmasý
@@ -578,6 +579,7 @@ DETAILS_TOOLTIP_76	Büyü saldýrýsýyla aldýðýn hasarý düþürür.
 DETAILS_TOOLTIP_77	Rakibinin büyü direncini düþürür.
 DETAILS_TOOLTIP_78	Canavarlardan alýnan hasar düþer.
 DETAILS_TOOLTIP_79	Büyülü saldýrý deðerini yükseltir.
+DETAILS_TOOLTIP_80	Patronlara karþý güçlü: Patron canavarlara verdiðin normal saldýrý hasarýný artýrýr.
 DETAILS_TOOLTIP_ATTBONUS_BELL	Çan Savunmasýnýn Kýrýlmasý: Düþmanýnýn çan savunmasýný azaltýr.
 DETAILS_TOOLTIP_ATTBONUS_BOW	Ok Savunmasýnýn Kýrýlmasý: Düþmanýnýn ok savunmasýný azaltýr.
 DETAILS_TOOLTIP_ATTBONUS_CLAW	Pençe Savunmasýnýn Kýrýlmasý: Düþmanýnýn pençe savunmasýný azaltýr.
