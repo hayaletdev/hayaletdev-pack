@@ -57,7 +57,7 @@ window = {
 					"vertical_align" : "bottom",
 					"text_horizontal_align" : "center",
 					"x" : 0,
-					"y" : 70,
+					"y" : 114,
 				},
 				{
 					"name" : "Cost",
@@ -67,7 +67,7 @@ window = {
 					"vertical_align" : "bottom",
 					"text_horizontal_align" : "center",
 					"x" : 0,
-					"y" : 54,
+					"y" : 98,
 				},
 				{
 					"name" : "AcceptButton",

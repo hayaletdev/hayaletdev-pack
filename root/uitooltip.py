@@ -2014,6 +2014,31 @@ class ItemToolTip(ToolTip):
 		self.AppendDescription(itemDesc, 26)
 		self.AppendDescription(itemSummary, 26, self.CONDITION_COLOR)
 
+		### REFINE TALISMAN CUSTOM TOOLTIP ###
+		if itemVnum == 90001:
+			self.AppendDescription(localeInfo.TOOLTIP_REFINE_TALISMAN_SMALL, 26)
+			self.AppendTextLine(localeInfo.TOOLTIP_REFINE_TALISMAN_MAX % 5, 0xFFFFFF00)
+			if app.ENABLE_SOULBIND_SYSTEM:
+				self.__AppendSealInformation(window_type, slotIndex)
+			self.ShowToolTip()
+			return
+
+		elif itemVnum == 90002:
+			self.AppendDescription(localeInfo.TOOLTIP_REFINE_TALISMAN_MEDIUM, 26)
+			self.AppendTextLine(localeInfo.TOOLTIP_REFINE_TALISMAN_MAX % 10, 0xFFFFFF00)
+			if app.ENABLE_SOULBIND_SYSTEM:
+				self.__AppendSealInformation(window_type, slotIndex)
+			self.ShowToolTip()
+			return
+
+		elif itemVnum == 90003:
+			self.AppendDescription(localeInfo.TOOLTIP_REFINE_TALISMAN_LARGE, 26)
+			self.AppendTextLine(localeInfo.TOOLTIP_REFINE_TALISMAN_MAX % 12, 0xFFFFFF00)
+			if app.ENABLE_SOULBIND_SYSTEM:
+				self.__AppendSealInformation(window_type, slotIndex)
+			self.ShowToolTip()
+			return
+
 		### Weapon ###
 		if item.ITEM_TYPE_WEAPON == itemType:
 

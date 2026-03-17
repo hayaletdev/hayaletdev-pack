@@ -7737,9 +7737,6 @@
 86064	Kalp kuþaðý (kiþiye öz.)	Bu kuþak kullandýðýn silah veya zýrha ait bonusun %11~20'sini emer.
 89999	Aura belgesi+	Bu nesne ile bir aura giysisinin toplanan tüm deðerlerini kaldýrabilirsin.
 90000	Dönüþüm Belgesi	Omuz kuþaðýndaki bonuslarý silmek için dönüþüm belgesini kullan.
-90001	Boþ Su Þiþesi	Su taþýmak icin kullanýlan boþ kap.
-90002	Su Þiþesi	Su taþýmak için kullanýlan kap.
-90003	Kristal	Güneþ ýþýðýnda büyüleyici þekilde parlayan hoþ ve temiz kesimli deðerli bir taþ.
 90004	Deðerli Taþ	Süs yapýmýnda kullanýlan hoþ renkli yatak kesim bir taþ.
 90005	Su Taþý	Silah ve mutfak gereçlerini bilemeye yarayan sert, kalýn taþ.
 90006	Zihin Taþý	Bu taþ zýrh ve silahlara eklenerek eþyanýn kalitesini arttýrýr.
@@ -7850,8 +7847,7 @@
 165100	Mitsi ejderha oniksi	
 165200	Mitsi ejderha oniksi	
 165300	Mitsi ejderha oniksi	
-165400	Mitsi ejderha oniksi	
-175401	Ejderha alevi	Ýlahi alev ile efsanevi ejderha taþýnýn bonuslarýný deðiþtirebilirsin. Gereken alev sayýsý, taþýnýn saflýk derecesine baðlýdýr. Bunun için simyacýya git.
+165400	Mitsi ejderha oniksi
 711151	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.
 711152	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.
 711153	Yaban domuzu (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götürecek, güçlü bir hayvanýn ruhunu çaðýrýr.
@@ -7868,3 +7864,4 @@
 711212	Aslan (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götüren güçlü bir hayvanýn ruhunu çaðýrýr.
 711213	Aslan (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götüren güçlü bir hayvanýn ruhunu çaðýrýr.
 711214	Aslan (mavi)	Mührün büyüsü, seni hýzlýca istediðin yere götüren güçlü bir hayvanýn ruhunu çaðýrýr.
+175401	Premium Konfor Paketi	Günlük maceralarýnda sana yardýmcý olacak çeþitli konfor avantajlarý sunar. Kullanýldýðýnda etkileri anýnda aktif olur. Süreli bir eþyadýr.

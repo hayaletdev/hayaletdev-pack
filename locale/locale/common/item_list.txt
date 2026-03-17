@@ -11558,6 +11558,9 @@
 86063	WING	icon/item/86063.tga	d:/ymir work/item/wing/acce_valentine_2020_3.gr2
 86064	WING	icon/item/86064.tga	d:/ymir work/item/wing/acce_valentine_2020_4.gr2
 90000	ETC	icon/item/90000.tga
+90001	ETC	icon/item/90001.tga
+90002	ETC	icon/item/90002.tga
+90003	ETC	icon/item/90003.tga
 90008	ETC	icon/item/70010.tga
 90009	ETC	icon/item/90009.tga
 90010	ETC	icon/item/90010.tga

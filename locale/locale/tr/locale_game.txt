@@ -3680,3 +3680,8 @@ YUTNORI_EVENT_MESSAGE_CARD_GAIN	Yutnori oyun tahta(larý) alýrsýn.
 YUTNORI_EVENT_MESSAGE_CARD_PEICE_GAIN	1 Kayýn Kütüðü kazandýn.
 YUTNORI_EVENT_MESSAGE_NOT_ENOUGHT_ITEM	Oynamak için yeterince nesne veya paran yok.
 YUTNORI_EVENT_MESSAGE_NO_MORE_GAIN	Baþka Yutnori oyun tahtasý alamazsýn.
+TOOLTIP_REFINE_TALISMAN_SMALL	1-75 seviye arasý eþyalarýn|güçlendirilmesinde kullanýlýr.|10 adede kadar kullanýlabilir.
+TOOLTIP_REFINE_TALISMAN_MEDIUM	76-105 seviye arasý eþyalarýn|güçlendirilmesinde kullanýlýr.|10 adede kadar kullanýlabilir.
+TOOLTIP_REFINE_TALISMAN_LARGE	106 seviye ve üzeri eþyalarýn|güçlendirilmesinde kullanýlýr.|10 adede kadar kullanýlabilir.
+TOOLTIP_REFINE_TALISMAN_MAX	Maksimum %d ek baþarý þansý saðlar.
+REFINE_TALISMAN_TEXT	Þans Týlsýmý :

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import app
 import net
 import player
@@ -9,6 +10,8 @@ import localeInfo
 import uiCommon
 import constInfo
 import osfInfo
+import chat
+
 
 if app.WJ_ENABLE_TRADABLE_ICON:
 	INVENTORY_PAGE_SIZE = player.INVENTORY_PAGE_SIZE
@@ -55,7 +58,7 @@ class RefineDialog(ui.ScriptWindow):
 			import exception
 			exception.Abort("RefineDialog.__LoadScript.BindObject")
 
-		## 936 : ���� Ȯ�� ǥ�� ����
+		## 936 : 개량 확률 표시 안함
 		##if 936 == app.GetDefaultCodePage():
 		if osfInfo.SHOW_REFINE_PERCENTAGE == True:
 			self.successPercentage.Show()
@@ -215,11 +218,24 @@ class RefineDialogNew(ui.ScriptWindow):
 		self.src_vnum = 0
 		self.IsShow = False
 
+		self.talismanSlot = None
+		self.talismanBoard = None
+		self.talismanText = None
+		self.talismanItemPos = -1
+		self.talismanItemVnum = 0
+		self.talismanItemCount = 0
+		self.talismanBonusPct = 0
+		self.bottomInfoBg = None
+		self.bottomProbText = None
+		self.bottomCostText = None
+		self.bottomTalismanText = None
+
+		self.materialChildren = []
+
 	def __LoadScript(self):
 		try:
 			pyScrLoader = ui.PythonScriptLoader()
 			pyScrLoader.LoadScriptFile(self, "uiscript/refinedialog.py")
-
 		except:
 			import exception
 			exception.Abort("RefineDialog.__LoadScript.LoadObject")
@@ -229,18 +245,71 @@ class RefineDialogNew(ui.ScriptWindow):
 			self.titleBar = self.GetChild("TitleBar")
 			self.probText = self.GetChild("SuccessPercentage")
 			self.costText = self.GetChild("Cost")
+
 			self.GetChild("AcceptButton").SetEvent(self.OpenQuestionDialog)
 			self.GetChild("CancelButton").SetEvent(self.CancelRefine)
+
+			# Eski script textlerini gizle, artık alttaki panelden göstereceğiz
+			if self.probText:
+				self.probText.Hide()
+
+			if self.costText:
+				self.costText.Hide()
+
+			# Scriptteki eski tılsım textini de gizle
+			self.talismanText = None
+			if app.ENABLE_REFINE_TALISMAN_SYSTEM:
+				try:
+					self.talismanText = self.GetChild("TalismanText")
+				except:
+					self.talismanText = None
+
+				if self.talismanText:
+					self.talismanText.Hide()
+
+			# Alt bilgi paneli
+			self.bottomInfoBg = None
+
+			self.bottomProbText = self.__MakeTextLine("")
+			self.bottomProbText.SetParent(self.board) # Parent Board oldu
+			self.bottomProbText.SetPackedFontColor(0xffFFFF00) # 0xff(Alpha) FFFF00(Sarı)
+			self.bottomProbText.Show()
+
+			self.bottomCostText = self.__MakeTextLine("")
+			self.bottomCostText.SetParent(self.board) # Parent Board oldu
+			self.bottomProbText.SetPackedFontColor(0xffFFFF00) # 0xff(Alpha) FFFF00(Sarı)
+			self.bottomCostText.Show()
+
+			self.bottomTalismanText = None
+			self.talismanSlot = None
+
+			if app.ENABLE_REFINE_TALISMAN_SYSTEM:
+				# 1. Tılsım Slotunu doğrudan Board'a bağla (Tıpkı inciler/taşlar gibi solda bağımsız duracak)
+				self.talismanSlot = ui.SlotWindow()
+				self.talismanSlot.SetParent(self.board)
+				self.talismanSlot.SetSize(32, 32)
+				self.talismanSlot.SetSlotBaseImage("d:/ymir work/ui/public/Slot_Base.sub", 1.0, 1.0, 1.0, 1.0)
+				self.talismanSlot.AppendSlot(0, 0, 0, 32, 32)
+				self.talismanSlot.SetOverInItemEvent(ui.__mem_func__(self.OverInTalisman))
+				self.talismanSlot.SetOverOutItemEvent(ui.__mem_func__(self.OverOutTalisman))
+				self.talismanSlot.SetSelectEmptySlotEvent(ui.__mem_func__(self.SelectEmptyTalismanSlot))
+				self.talismanSlot.SetSelectItemSlotEvent(ui.__mem_func__(self.SelectTalismanSlot))
+				self.talismanSlot.RefreshSlot()
+				self.talismanSlot.Show()
+
+				# 2. Yazı için arkaplan (ThinBoard) oluştur ve Board'a bağla
+				self.talismanBoard = ui.ThinBoard()
+				self.talismanBoard.SetParent(self.board)
+				self.talismanBoard.Show()
+
+				# 3. Yazıyı arkaplanın (ThinBoard) içine göm
+				self.bottomTalismanText = self.__MakeTextLine(localeInfo.REFINE_TALISMAN_TEXT)
+				self.bottomTalismanText.SetParent(self.talismanBoard)
+				self.bottomTalismanText.Show()
+
 		except:
 			import exception
 			exception.Abort("RefineDialog.__LoadScript.BindObject")
-
-		## 936 : ���� Ȯ�� ǥ�� ����
-		##if 936 == app.GetDefaultCodePage():
-		if osfInfo.SHOW_REFINE_PERCENTAGE == True:
-			self.probText.Show()
-		else:
-			self.probText.Hide()
 
 		toolTip = uiToolTip.ItemToolTip()
 		toolTip.SetParent(self)
@@ -324,6 +393,18 @@ class RefineDialogNew(ui.ScriptWindow):
 		thinBoard.Show()
 		self.children.append(thinBoard)
 		return thinBoard
+	
+	def __MakeTextLine(self, text):
+		textLine = ui.TextLine()
+		textLine.SetParent(self)
+		textLine.SetFontName(localeInfo.UI_DEF_FONT)
+		textLine.SetPackedFontColor(0xffdddddd)
+		textLine.SetText(text)
+		textLine.SetOutline()
+		textLine.SetFeather(False)
+		textLine.Show()
+		self.children.append(textLine)
+		return textLine
 
 	def Destroy(self):
 		self.ClearDictionary()
@@ -335,12 +416,30 @@ class RefineDialogNew(ui.ScriptWindow):
 		self.toolTip = 0
 		self.slotList = []
 		self.children = []
+		self.bottomInfoBg = None
+		self.talismanSlot = None
+		self.talismanText = None
+		self.materialChildren = []
+
+	def ClearMaterialList(self):
+		if osfInfo.SHOW_REFINE_ITEM_DESC:
+			TOOLTIP_DATA["materials"] = []
+
+		if not hasattr(self, "materialChildren"):
+			self.materialChildren = []
+
+		for wnd in self.materialChildren:
+			try:
+				wnd.Hide()
+			except:
+				pass
+
+		self.materialChildren = []
+		self.dialogHeight = 0
 
 	def Open(self, targetItemPos, nextGradeItemVnum, cost, prob, type, apply_random_list, src_vnum):
 		if False == self.isLoaded:
 			self.__LoadScript()
-
-		self.__Initialize()
 
 		self.targetItemPos = targetItemPos
 		self.vnum = nextGradeItemVnum
@@ -348,11 +447,26 @@ class RefineDialogNew(ui.ScriptWindow):
 		self.percentage = prob
 		self.type = type
 		self.src_vnum = src_vnum
+		self.dialogHeight = 0
+		self.IsShow = False
 
-		self.probText.SetText(localeInfo.REFINE_SUCCESS_PROBALITY % (self.percentage))
-		self.costText.SetText(localeInfo.REFINE_COST % (self.cost))
+		if app.ENABLE_REFINE_TALISMAN_SYSTEM:
+			self.ClearTalismanSlot()
+			self.RefreshProbabilityText()
+		else:
+			if self.bottomProbText:
+				self.bottomProbText.SetText(localeInfo.REFINE_SUCCESS_PROBALITY % (self.percentage))
+
+		if self.bottomCostText:
+			# Vibe Coding: Yang miktarını 3'erli gruplara bölüp arasına nokta koyan jilet gibi matematik
+			formatted_cost = ".".join([str(self.cost)[::-1][i:i+3] for i in range(0, len(str(self.cost)), 3)])[::-1]
+			
+			# locale_game.txt dosyasını editleme ameleliği yapmamak için %d'yi anında %s'e çevirip basıyoruz!
+			self.bottomCostText.SetText(localeInfo.REFINE_COST.replace('%d', '%s') % (formatted_cost))
 
 		self.toolTip.ClearToolTip()
+		self.ClearMaterialList()
+
 		metinSlot = []
 		for i in xrange(player.METIN_SOCKET_MAX_NUM):
 			metinSlot.append(player.GetItemMetinSocket(targetItemPos, i))
@@ -368,22 +482,134 @@ class RefineDialogNew(ui.ScriptWindow):
 
 		item.SelectItem(nextGradeItemVnum)
 		self.itemImage.LoadImage(item.GetIconImageFileName())
+
 		xSlotCount, ySlotCount = item.GetItemSize()
+
 		for slot in self.slotList:
 			slot.Hide()
+
 		for i in xrange(min(3, ySlotCount)):
-			self.slotList[i].SetPosition(-35, i*32 - (ySlotCount-1)*16)
+			self.slotList[i].SetPosition(-35, i * 32 - (ySlotCount - 1) * 16)
 			self.slotList[i].Show()
 
 		self.dialogHeight = self.toolTip.GetHeight() + 46
 		self.UpdateDialog()
 
-		self.SetTop()
+		if app.ENABLE_REFINE_TALISMAN_SYSTEM:
+			self.RefreshProbabilityText()
 
+		self.SetTop()
 		self.Show()
 		self.IsShow = True
 
+	if app.ENABLE_REFINE_TALISMAN_SYSTEM:
+		def IsRefineTalisman(self, vnum):
+			return vnum in (90001, 90002, 90003)
+
+		def IsValidTalismanForTarget(self, talismanVnum):
+			item.SelectItem(self.vnum)
+
+			levelLimit = 0
+			for i in xrange(item.LIMIT_MAX_NUM):
+				limitType, limitValue = item.GetLimit(i)
+				if limitType == item.LIMIT_LEVEL:
+					levelLimit = limitValue
+					break
+
+			if levelLimit <= 75:
+				return talismanVnum == 90001
+			elif levelLimit <= 105:
+				return talismanVnum == 90002
+			else:
+				return talismanVnum == 90003
+
+		def GetRefineTalismanBonus(self, vnum, count):
+			useCount = min(count, 10)
+
+			if vnum == 90001:      # K???k -> max +5
+				return (useCount * 5) // 10
+			elif vnum == 90002:    # Orta -> max +10
+				return (useCount * 10) // 10
+			elif vnum == 90003:    # B?y?k -> max +12
+				return (useCount * 12) // 10
+
+			return 0
+
+		def ClearTalismanSlot(self):
+			self.talismanItemPos = -1
+			self.talismanItemVnum = 0
+			self.talismanItemCount = 0
+			self.talismanBonusPct = 0
+
+			if self.talismanSlot:
+				self.talismanSlot.ClearSlot(0)
+				self.talismanSlot.RefreshSlot()
+
+			self.RefreshProbabilityText()
+
+		def OverInTalisman(self, slotIndex):
+			if self.talismanItemPos == -1:
+				return
+
+			if osfInfo.SHOW_REFINE_ITEM_DESC == True and self.toolTipItem:
+				self.toolTipItem.ClearToolTip()
+				self.toolTipItem.SetInventoryItem(self.talismanItemPos)
+
+		def OverOutTalisman(self):
+			if osfInfo.SHOW_REFINE_ITEM_DESC == True and self.toolTipItem:
+				self.toolTipItem.HideToolTip()
+
+		def SelectEmptyTalismanSlot(self, slotIndex):
+			if not mouseModule.mouseController.isAttached():
+				return
+
+			attachedType = mouseModule.mouseController.GetAttachedType()
+			attachedPos = mouseModule.mouseController.GetAttachedSlotNumber()
+
+			if attachedType != player.SLOT_TYPE_INVENTORY:
+				mouseModule.mouseController.DeattachObject()
+				return
+
+			vnum = player.GetItemIndex(attachedPos)
+			count = player.GetItemCount(attachedPos)
+
+			if not self.IsRefineTalisman(vnum):
+				mouseModule.mouseController.DeattachObject()
+				return
+
+			if not self.IsValidTalismanForTarget(vnum):
+				chat.AppendChat(chat.CHAT_TYPE_INFO, "Bu tılsım bu e?ya i?in kullanılamaz.")
+				mouseModule.mouseController.DeattachObject()
+				return
+
+			self.talismanItemPos = attachedPos
+			self.talismanItemVnum = vnum
+			self.talismanItemCount = min(count, 10)
+			self.talismanBonusPct = self.GetRefineTalismanBonus(vnum, self.talismanItemCount)
+
+			self.talismanSlot.SetItemSlot(0, vnum, self.talismanItemCount)
+			self.talismanSlot.RefreshSlot()
+
+			self.RefreshProbabilityText()
+			mouseModule.mouseController.DeattachObject()
+
+		def SelectTalismanSlot(self, slotIndex):
+			self.ClearTalismanSlot()
+
+	def RefreshProbabilityText(self):
+			if self.talismanBonusPct > 0:
+				if self.bottomProbText:
+					# Mevcut locale yazısını alıp (Örn: Yükseltme şansı %80), sonuna tılsım bonusunu ekliyoruz!
+					base_text = localeInfo.REFINE_SUCCESS_PROBALITY % (self.percentage)
+					bonus_text = " (+%.1f%%)" % (self.talismanBonusPct)
+					self.bottomProbText.SetText(base_text + bonus_text)
+			else:
+				if self.bottomProbText:
+					self.bottomProbText.SetText(localeInfo.REFINE_SUCCESS_PROBALITY % (self.percentage))
+
 	def Close(self):
+		self.ClearMaterialList()
+
 		if app.WJ_ENABLE_TRADABLE_ICON:
 			self.SetCanMouseEventSlot(self.targetItemPos)
 
@@ -403,19 +629,23 @@ class RefineDialogNew(ui.ScriptWindow):
 			slot.SetItemSlot(slotIndex, vnum, count)
 
 			TOOLTIP_DATA["materials"].append(vnum)
+			self.materialChildren.append(slot)
 		else:
 			slot = self.__MakeSlot()
 			slot.SetParent(self)
 			slot.SetPosition(15, self.dialogHeight)
+			self.materialChildren.append(slot)
 
 			itemImage = self.__MakeItemImage()
 			itemImage.SetParent(slot)
 			item.SelectItem(vnum)
 			itemImage.LoadImage(item.GetIconImageFileName())
+			self.materialChildren.append(itemImage)
 
 		thinBoard = self.__MakeThinBoard()
 		thinBoard.SetPosition(50, self.dialogHeight)
 		thinBoard.SetSize(self.toolTip.GetWidth(), 20)
+		self.materialChildren.append(thinBoard)
 
 		textLine = ui.TextLine()
 		textLine.SetParent(thinBoard)
@@ -428,47 +658,103 @@ class RefineDialogNew(ui.ScriptWindow):
 		textLine.SetVerticalAlignCenter()
 
 		if localeInfo.IsARABIC():
-			(x,y) = textLine.GetTextSize()
+			(x, y) = textLine.GetTextSize()
 			textLine.SetPosition(x, 0)
 		else:
 			textLine.SetPosition(15, 0)
 
 		textLine.Show()
 		self.children.append(textLine)
+		self.materialChildren.append(textLine)
 
 		self.dialogHeight += 34
 		self.UpdateDialog()
 
 	def UpdateDialog(self):
-		newWidth = self.toolTip.GetWidth() + 60
-		newHeight = self.dialogHeight + 69
-		if osfInfo.SHOW_REFINE_PERCENTAGE == True:
-			newHeight += 15
+		newWidth = self.toolTip.GetWidth() + 65
+		
+		# Elemanları yukarıdan aşağıya doğru sırayla dizeceğiz, bu yüzden Y koordinatını takip eden bir değişken yapıyoruz
+		currentY = self.dialogHeight + 10
 
-		## 936 : ���� Ȯ�� ǥ�� ����
-		##if 936 == app.GetDefaultCodePage():
-		newHeight -= 8
+		# --- 1. KISIM: İhtimal ve Yang Yazıları (Ortalanmış ve Alt Alta) ---
+		if self.bottomProbText:
+			self.bottomProbText.SetWindowHorizontalAlignCenter()
+			self.bottomProbText.SetWindowVerticalAlignTop()
+			self.bottomProbText.SetHorizontalAlignCenter() # Yazıyı kendi içinde ortala
+			self.bottomProbText.SetPosition(0, currentY)
 
+		if self.bottomCostText:
+			self.bottomCostText.SetWindowHorizontalAlignCenter()
+			self.bottomCostText.SetWindowVerticalAlignTop()
+			self.bottomCostText.SetHorizontalAlignCenter()
+			self.bottomCostText.SetPosition(0, currentY + 20)
+
+		currentY += 50 # Yazılar bitti, Tılsım kutusundan önce 30 piksel boşluk bıraktık (20 + 30 = 50)
+
+		# --- 2. KISIM: Şans Tılsımı Alanı (Arkaplanlı, metin solda, slot sağda) ---
+		if app.ENABLE_REFINE_TALISMAN_SYSTEM and self.talismanSlot and hasattr(self, 'talismanBoard'):
+			
+			# 1. Slotu tıpkı diğer materyaller gibi sola hizala (X=15)
+			self.talismanSlot.SetWindowHorizontalAlignLeft()
+			self.talismanSlot.SetWindowVerticalAlignTop()
+			self.talismanSlot.SetPosition(15, currentY)
+			
+			# 2. Arkaplanı materyal arkaplanlarıyla pikseli pikseline aynı yap (X=50, Yükseklik=20)
+			boardWidth = self.toolTip.GetWidth()
+			boardHeight = 20 
+			
+			self.talismanBoard.SetSize(boardWidth, boardHeight)
+			self.talismanBoard.SetPosition(50, currentY)
+			
+			# 3. Tılsım yazısını arkaplanın (ThinBoard) dikey merkezine sabitle
+			if self.bottomTalismanText:
+				self.bottomTalismanText.SetWindowVerticalAlignCenter()
+				self.bottomTalismanText.SetVerticalAlignCenter()
+				self.bottomTalismanText.SetPosition(15, 0)
+			
+			# Sonraki blok (butonlar vs.) için Y eksenini aşağı kaydır
+			currentY += 35
+
+		# --- 3. KISIM: Butonlar (En altta ortalı) ---
+		try:
+			acceptBtn = self.GetChild("AcceptButton")
+			cancelBtn = self.GetChild("CancelButton")
+			
+			acceptBtn.SetWindowHorizontalAlignLeft()
+			acceptBtn.SetWindowVerticalAlignTop()
+			cancelBtn.SetWindowHorizontalAlignLeft()
+			cancelBtn.SetWindowVerticalAlignTop()
+			
+			acceptBtn.SetPosition((newWidth / 2) - 65, currentY)
+			cancelBtn.SetPosition((newWidth / 2) + 15, currentY)
+			
+			currentY += 35 # Buton yüksekliğini ekle
+		except:
+			pass
+
+		# Toplam yüksekliği hesapladığımız güncel Y değerine 10 piksel dip boşluk ekleyerek buluyoruz
+		newHeight = currentY + 1
+
+		# Arapça dil desteği kaymaları
 		if localeInfo.IsARABIC():
 			self.board.SetPosition(newWidth, 0)
-
 			(x, y) = self.titleBar.GetLocalPosition()
 			self.titleBar.SetPosition(newWidth - 15, y)
 
 		self.board.SetSize(newWidth, newHeight)
 		self.toolTip.SetPosition(15 + 35, 38)
-		self.titleBar.SetWidth(newWidth-15)
+		self.titleBar.SetWidth(newWidth - 15)
 		self.SetSize(newWidth, newHeight)
 
 		(x, y) = self.GetLocalPosition()
 		self.SetPosition(x, y)
-
+		
 	def OpenQuestionDialog(self):
 		if 100 == self.percentage:
 			self.Accept()
 			return
 
-		if 5 == self.type: ## ������ �ູ��
+		if 5 == self.type:
 			self.Accept()
 			return
 
@@ -487,7 +773,7 @@ class RefineDialogNew(ui.ScriptWindow):
 		dlgQuestion.SetAcceptEvent(ui.__mem_func__(self.Accept))
 		dlgQuestion.SetCancelEvent(ui.__mem_func__(dlgQuestion.Close))
 
-		if 3 == self.type: ## ��ö
+		if 3 == self.type:
 			if localeInfo.IsEUROPE():
 				if dlgQuestion:
 					del dlgQuestion
@@ -499,7 +785,7 @@ class RefineDialogNew(ui.ScriptWindow):
 			else:
 				dlgQuestion.SetText1(localeInfo.REFINE_DESTROY_WARNING_WITH_BONUS_PERCENT_1)
 				dlgQuestion.SetText2(localeInfo.REFINE_DESTROY_WARNING_WITH_BONUS_PERCENT_2)
-		elif 2 == self.type: ## �ູ��
+		elif 2 == self.type:
 			dlgQuestion.SetText1(localeInfo.REFINE_DOWN_GRADE_WARNING)
 		else:
 			dlgQuestion.SetText1(localeInfo.REFINE_DESTROY_WARNING)
@@ -508,10 +794,22 @@ class RefineDialogNew(ui.ScriptWindow):
 		self.dlgQuestion = dlgQuestion
 
 	def Accept(self):
-		net.SendRefinePacket(self.targetItemPos, self.type)
+		if app.ENABLE_REFINE_TALISMAN_SYSTEM and hasattr(net, "SendRefinePacketEx"):
+			net.SendRefinePacketEx(
+				self.targetItemPos,
+				self.type,
+				self.talismanItemPos if self.talismanItemPos != -1 else 255,
+				min(self.talismanItemCount, 10)
+			)
+		else:
+			net.SendRefinePacket(self.targetItemPos, self.type)
+
 		self.Close()
 
 	def CancelRefine(self):
+		if app.ENABLE_REFINE_TALISMAN_SYSTEM:
+			self.ClearTalismanSlot()
+
 		net.SendRefinePacket(255, 255)
 		self.Close()
 
@@ -533,7 +831,7 @@ class RefineDialogNew(ui.ScriptWindow):
 		def SetCanMouseEventSlot(self, idx):
 			if idx >= INVENTORY_PAGE_SIZE:
 				if app.ENABLE_EXTEND_INVEN_SYSTEM:
-					page = self.inven.GetInventoryPageIndex() # 0,1,2,3
+					page = self.inven.GetInventoryPageIndex()
 					idx -= (page * INVENTORY_PAGE_SIZE)
 				else:
 					idx -= INVENTORY_PAGE_SIZE
@@ -548,14 +846,14 @@ class RefineDialogNew(ui.ScriptWindow):
 			if targetItemPos <= 0:
 				return
 
-			page = self.inven.GetInventoryPageIndex() # range 0 ~ 1
+			page = self.inven.GetInventoryPageIndex()
 
-			if (page * INVENTORY_PAGE_SIZE) <= targetItemPos < ((page + 1) * INVENTORY_PAGE_SIZE): # range 0 ~ 44, 45 ~ 89
+			if (page * INVENTORY_PAGE_SIZE) <= targetItemPos < ((page + 1) * INVENTORY_PAGE_SIZE):
 				lock_idx = targetItemPos - (page * INVENTORY_PAGE_SIZE)
 				self.inven.wndItem.SetCantMouseEventSlot(lock_idx)
 
+				
 if app.ENABLE_REFINE_ELEMENT_SYSTEM:
-	import chat
 
 	MIN_REFINE_LEVEL = 7
 
@@ -1017,6 +1315,18 @@ if app.ENABLE_REFINE_ELEMENT_SYSTEM:
 			thinboard.SetParent(self)
 			thinboard.Show()
 			return thinboard
+		
+		def __MakeTextLine(self, text):
+			textLine = ui.TextLine()
+			textLine.SetParent(self)
+			textLine.SetFontName(localeInfo.UI_DEF_FONT)
+			textLine.SetPackedFontColor(0xffdddddd)
+			textLine.SetText(text)
+			textLine.SetOutline()
+			textLine.SetFeather(False)
+			textLine.Show()
+			self.children.append(textLine)
+			return textLine
 
 		def __UpdateDialog(self):
 			new_width = self.tooltip.GetWidth() + 60

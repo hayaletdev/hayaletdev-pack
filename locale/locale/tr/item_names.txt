@@ -11417,3 +11417,6 @@ VNUM	LOCALE_NAME
 175300	Mitsi ejderha ametisti
 175400  Mitsi ejderha ametisti
 175401  Premium Konfor Paketi
+90001	Küçük Güçlendirme Týlsýmý
+90002	Orta Güçlendirme Týlsýmý
+90003	Büyük Güçlendirme Týlsýmý
