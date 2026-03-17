@@ -758,3 +758,46 @@ if app.ENABLE_MULTI_LANGUAGE_SYSTEM:
 			"down_image" : ROOT_PATH + "middle_button_03.sub",
 		},
 	] + window["children"][0]["children"]
+
+if app.ENABLE_DOG_MODE:
+	LINE_NUMBER += 1
+	window["height"] = window["height"] + LINE_STEP
+	window["children"][0]["height"] = window["children"][0]["height"] + LINE_STEP
+	window["children"][0]["children"] = [
+		## Dog Mode
+		{
+			"name" : "dogmode_on_off",
+			"type" : "text",
+
+			"x" : LINE_LABEL_X,
+			"y" : LINE_BEGIN + LINE_STEP * LINE_NUMBER + 2,
+
+			"text" : uiScriptLocale.OPTION_DOG_MODE,
+		},
+		{
+			"name" : "dog_mode_open",
+			"type" : "radio_button",
+
+			"x" : LINE_DATA_X,
+			"y" : LINE_BEGIN + LINE_STEP * LINE_NUMBER,
+
+			"text" : uiScriptLocale.OPTION_DOG_MODE_ENABLE,
+
+			"default_image" : ROOT_PATH + "middle_button_01.sub",
+			"over_image" : ROOT_PATH + "middle_button_02.sub",
+			"down_image" : ROOT_PATH + "middle_button_03.sub",
+		},
+		{
+			"name" : "dog_mode_close",
+			"type" : "radio_button",
+
+			"x" : LINE_DATA_X + MIDDLE_BUTTON_WIDTH,
+			"y" : LINE_BEGIN + LINE_STEP * LINE_NUMBER,
+
+			"text" : uiScriptLocale.OPTION_DOG_MODE_DISABLE,
+
+			"default_image" : ROOT_PATH + "middle_button_01.sub",
+			"over_image" : ROOT_PATH + "middle_button_02.sub",
+			"down_image" : ROOT_PATH + "middle_button_03.sub",
+		},
+	] + window["children"][0]["children"]

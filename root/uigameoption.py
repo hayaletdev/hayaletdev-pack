@@ -53,6 +53,8 @@ class OptionDialog(ui.ScriptWindow):
 		self.RefreshViewChat()
 		self.RefreshAlwaysShowName()
 		self.RefreshShowDamage()
+		if app.ENABLE_DOG_MODE:
+			self.RefreshDogMode()
 		if app.ENABLE_OPTIMIZATION:
 			self.RefreshOtherCharAttacked()
 		self.RefreshShowSalesText()
@@ -75,6 +77,8 @@ class OptionDialog(ui.ScriptWindow):
 		self.viewChatButtonList = []
 		self.alwaysShowNameButtonList = []
 		self.showDamageButtonList = []
+		if app.ENABLE_DOG_MODE:
+			self.dogModeButtonList = []
 		if app.ENABLE_OPTIMIZATION:
 			self.other_char_attacked_button_list = []
 		self.showsalesTextButtonList = []
@@ -166,6 +170,10 @@ class OptionDialog(ui.ScriptWindow):
 
 			self.showsalesTextButtonList.append(GetObject("salestext_on_button"))
 			self.showsalesTextButtonList.append(GetObject("salestext_off_button"))
+
+			if app.ENABLE_DOG_MODE:
+				self.dogModeButtonList.append(GetObject("dog_mode_open"))
+				self.dogModeButtonList.append(GetObject("dog_mode_close"))
 
 			if app.WJ_SHOW_MOB_INFO:
 				self.showMobInfoButtonList.append(GetObject("show_mob_level_button"))
@@ -260,6 +268,10 @@ class OptionDialog(ui.ScriptWindow):
 
 		self.showsalesTextButtonList[0].SAFE_SetEvent(self.__OnClickSalesTextOnButton)
 		self.showsalesTextButtonList[1].SAFE_SetEvent(self.__OnClickSalesTextOffButton)
+
+		if app.ENABLE_DOG_MODE:
+			self.dogModeButtonList[0].SAFE_SetEvent(self.__OnClickDogButton)
+			self.dogModeButtonList[1].SAFE_SetEvent(self.__OffClickDogButton)
 
 		if app.WJ_SHOW_MOB_INFO:
 			self.showMobInfoButtonList[0].SetToggleUpEvent(self.__OnClickShowMobLevelButton)
@@ -432,6 +444,23 @@ class OptionDialog(ui.ScriptWindow):
 	def __OnClickSalesTextOffButton(self):
 		systemSetting.SetShowSalesTextFlag(False)
 		self.RefreshShowSalesText()
+
+	if app.ENABLE_DOG_MODE:
+		def __OnClickDogButton(self):
+			systemSetting.SetDogMode(True)
+			self.RefreshDogMode()
+
+		def __OffClickDogButton(self):
+			systemSetting.SetDogMode(False)
+			self.RefreshDogMode()
+
+		def RefreshDogMode(self):
+			if systemSetting.GetDogMode():
+				self.dogModeButtonList[0].Down()
+				self.dogModeButtonList[1].SetUp()
+			else:
+				self.dogModeButtonList[0].SetUp()
+				self.dogModeButtonList[1].Down()
 
 	if app.WJ_SHOW_MOB_INFO:
 		def __OnClickShowMobLevelButton(self):

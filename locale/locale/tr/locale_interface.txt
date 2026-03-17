@@ -1349,3 +1349,6 @@ LOGIN_AUTOSAVE_DELETE	Sil
 LOGIN_AUTOSAVE_ADVICE	Kayýtlý hesaplara kýsayol kullanarak da giriþ yapabilirsiniz! Örn.: F1
 LOGIN_AUTOSAVE_HELP	Bilgilendirme
 LOGIN_AUTOSAVE_NONE	Boþ
+OPTION_DOG_MODE	Canavar Gör.
+OPTION_DOG_MODE_ENABLE	Köpek Modu
+OPTION_DOG_MODE_DISABLE	Normal
