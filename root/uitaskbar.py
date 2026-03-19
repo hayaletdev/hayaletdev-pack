@@ -325,6 +325,7 @@ if app.ENABLE_GEM_SYSTEM or app.ENABLE_CHEQUE_SYSTEM:
 
 class ExpandedTaskBar(ui.ScriptWindow):
 	BUTTON_DRAGON_SOUL = 0
+	BUTTON_DAILY_QUEST = 1
 
 	def __init__(self):
 		ui.Window.__init__(self)
@@ -348,6 +349,11 @@ class ExpandedTaskBar(ui.ScriptWindow):
 		self.toggleButtonDict = {}
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DRAGON_SOUL] = self.GetChild("DragonSoulButton")
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DRAGON_SOUL].SetParent(self)
+		try:
+			self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST] = self.GetChild("DailyQuestButton")
+			self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST].SetParent(self)
+		except:
+			pass
 
 		# 버튼의 위치를 다시 조정해 주는 함수
 		# 마지막에 호출 되어야 한다.
@@ -360,6 +366,8 @@ class ExpandedTaskBar(ui.ScriptWindow):
 		button_order = []
 		if not ExpandedTaskBar.BUTTON_DRAGON_SOUL in self.exclusion_list:
 			button_order.append(ExpandedTaskBar.BUTTON_DRAGON_SOUL)
+		if not ExpandedTaskBar.BUTTON_DAILY_QUEST in self.exclusion_list and self.toggleButtonDict.has_key(ExpandedTaskBar.BUTTON_DAILY_QUEST):
+			button_order.append(ExpandedTaskBar.BUTTON_DAILY_QUEST)
 
 		## 부모 window 의 position 을 다시 계산
 		total_count = len(button_order) # 정렬할 총 개수
@@ -412,11 +420,10 @@ class TaskBar(ui.ScriptWindow):
 	BUTTON_INVENTORY = 1
 	BUTTON_MESSENGER = 2
 	BUTTON_SYSTEM = 3
-	BUTTON_DAILY_QUEST = 4
-	BUTTON_CHAT = 5
-	BUTTON_EXPAND = 5
+	BUTTON_CHAT = 4
+	BUTTON_EXPAND = 4
 	if app.ENABLE_GEM_SYSTEM:
-		BUTTON_EXPAND_MONEY = 6
+		BUTTON_EXPAND_MONEY = 5
 	IS_EXPANDED = True
 
 	MOUSE_BUTTON_LEFT = 0
@@ -647,10 +654,6 @@ class TaskBar(ui.ScriptWindow):
 		toggleButtonDict[TaskBar.BUTTON_INVENTORY] = self.GetChild("InventoryButton")
 		toggleButtonDict[TaskBar.BUTTON_MESSENGER] = self.GetChild("MessengerButton")
 		toggleButtonDict[TaskBar.BUTTON_SYSTEM] = self.GetChild("SystemButton")
-		try:
-			toggleButtonDict[TaskBar.BUTTON_DAILY_QUEST] = self.GetChild("DailyQuestButton")
-		except:
-			pass
 
 		# ChatButton, ExpandButton 둘 중 하나는 반드시 존재한다.
 		try:

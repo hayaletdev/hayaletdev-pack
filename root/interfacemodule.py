@@ -269,15 +269,15 @@ class Interface(object):
 		self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_INVENTORY, ui.__mem_func__(self.ToggleInventoryWindow))
 		self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_MESSENGER, ui.__mem_func__(self.ToggleMessenger))
 		self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_SYSTEM, ui.__mem_func__(self.ToggleSystemDialog))
-		try:
-			self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_DAILY_QUEST, ui.__mem_func__(self.ToggleDailyQuestWindow))
-		except:
-			pass
 		if uiTaskBar.TaskBar.IS_EXPANDED:
 			self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_EXPAND, ui.__mem_func__(self.ToggleExpandedButton))
 			self.wndExpandedTaskBar = uiTaskBar.ExpandedTaskBar()
 			self.wndExpandedTaskBar.LoadWindow()
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DRAGON_SOUL, ui.__mem_func__(self.ToggleDragonSoulWindow))
+			try:
+				self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DAILY_QUEST, ui.__mem_func__(self.ToggleDailyQuestWindow))
+			except:
+				pass
 		else:
 			self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_CHAT, ui.__mem_func__(self.ToggleChat))
 
