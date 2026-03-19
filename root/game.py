@@ -34,11 +34,6 @@ import uiPlayerGauge
 import uiCharacter
 import uiTarget
 
-try:
-	import uidailyquest
-except ImportError:
-	uidailyquest = None
-
 # PRIVATE_SHOP_PRICE_LIST
 import uiPrivateShopBuilder
 # END_OF_PRIVATE_SHOP_PRICE_LIST
@@ -168,7 +163,6 @@ class GameWindow(ui.ScriptWindow):
 
 		self.partyRequestQuestionDialog = None
 		self.partyInviteQuestionDialog = None
-		self.dailyQuestWindow = None
 
 	def __del__(self):
 		player.SetGameWindow(0)
@@ -326,10 +320,6 @@ class GameWindow(ui.ScriptWindow):
 		self.guildInviteQuestionDialog = None
 		self.guildWarQuestionDialog = None
 		self.messengerAddFriendQuestion = None
-		if self.dailyQuestWindow:
-			self.dailyQuestWindow.Destroy()
-		self.dailyQuestWindow = None
-
 		# UNKNOWN_UPDATE
 		self.itemDropQuestionDialog = None
 		if app.ENABLE_NEW_DROP_DIALOG:
@@ -809,13 +799,9 @@ class GameWindow(ui.ScriptWindow):
 	if app.ENABLE_QUEST_RENEWAL:
 		def RefreshQuest(self, quest_type, quest_index):
 			self.interface.RefreshQuest(quest_type, quest_index)
-			if self.dailyQuestWindow:
-				self.dailyQuestWindow.OnQuestRefresh(quest_type, quest_index)
 
 		def DeleteQuest(self, quest_type, quest_index):
 			self.interface.DeleteQuest(quest_type, quest_index)
-			if self.dailyQuestWindow:
-				self.dailyQuestWindow.OnQuestDelete(quest_type, quest_index)
 	else:
 		def RefreshQuest(self):
 			self.interface.RefreshQuest()
@@ -2295,18 +2281,8 @@ class GameWindow(ui.ScriptWindow):
 		self.interface.missionBoard.CleanMission()
 
 	def __OpenDailyQuestDialog(self):
-		if not uidailyquest:
-			self.interface.OpenCharacterWindowWithState("QUEST")
-			chat.AppendChat(chat.CHAT_TYPE_INFO, "Daily Quest UI module not found.")
-			return
-
-		if not self.dailyQuestWindow:
-			self.dailyQuestWindow = uidailyquest.DailyQuestWindow(self.interface)
-
-		if self.dailyQuestWindow.IsShow():
-			self.dailyQuestWindow.Hide()
-		else:
-			self.dailyQuestWindow.Open()
+		if self.interface:
+			self.interface.ToggleDailyQuestWindow()
 
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:

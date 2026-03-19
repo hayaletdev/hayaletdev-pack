@@ -165,8 +165,13 @@ class DailyQuestWindow(ui.ScriptWindow):
 		if not self.questListBox:
 			return
 
-		for quest_index in self.dailyQuestDict.keys():
+		active_daily_quest_index_list = self.__CollectActiveDailyQuestIndices()
+		for quest_index in active_daily_quest_index_list:
 			self.__SyncQuestData(quest_index)
+
+		for quest_index in self.dailyQuestDict.keys():
+			if not quest_index in active_daily_quest_index_list:
+				del self.dailyQuestDict[quest_index]
 
 		self.questListBox.RemoveAllItems()
 
@@ -213,15 +218,55 @@ class DailyQuestWindow(ui.ScriptWindow):
 
 		event.QuestButtonClick(-2147483648 + self.selectedQuestIndex)
 
+	def __CollectActiveDailyQuestIndices(self):
+		quest_index_list = []
+
+		try:
+			quest_count = quest.GetQuestCount()
+		except:
+			return quest_index_list
+
+		for slot_index in xrange(quest_count):
+			try:
+				quest_index = quest.GetQuestIndex(slot_index)
+			except:
+				quest_index = slot_index
+
+			if quest_index <= 0:
+				continue
+
+			try:
+				quest_data = quest.GetQuestData(quest_index)
+				if len(quest_data) >= 6 and quest_data[0] != quest.QUEST_TYPE_DAILY:
+					continue
+			except:
+				continue
+
+			quest_index_list.append(quest_index)
+
+		return quest_index_list
+
 	def __SyncQuestData(self, quest_index):
 		try:
-			(quest_type, is_confirmed, quest_name, quest_icon, counter_name, counter_value) = quest.GetQuestData(quest_index)
-			if quest_type != quest.QUEST_TYPE_DAILY:
-				if quest_index in self.dailyQuestDict:
-					del self.dailyQuestDict[quest_index]
-				return
+			quest_data = quest.GetQuestData(quest_index)
 
-			(clock_name, clock_time) = quest.GetQuestLastTime(quest_index)
+			if len(quest_data) >= 6:
+				(quest_type, is_confirmed, quest_name, quest_icon, counter_name, counter_value) = quest_data
+				if quest_type != quest.QUEST_TYPE_DAILY:
+					if quest_index in self.dailyQuestDict:
+						del self.dailyQuestDict[quest_index]
+					return
+			else:
+				(quest_name, quest_icon, counter_name, counter_value) = quest_data
+				is_confirmed = 1
+
+			clock_name = ""
+			clock_time = 0
+			try:
+				(clock_name, clock_time) = quest.GetQuestLastTime(quest_index)
+			except:
+				pass
+
 			self.dailyQuestDict[quest_index] = {
 				"name" : quest_name,
 				"is_confirmed" : is_confirmed,

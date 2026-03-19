@@ -307,6 +307,19 @@ window = {
 
 		## Button
 		{
+			"name" : "DailyQuestButton",
+			"type" : "button",
+
+			"x" : SCREEN_WIDTH - 178,
+			"y" : 3 + Y_ADD_POSITION,
+
+			"tooltip_text" : "Gunluk Gorevler",
+
+			"default_image" : ROOT + "TaskBar/Chat_Button_01.sub",
+			"over_image" : ROOT + "TaskBar/Chat_Button_02.sub",
+			"down_image" : ROOT + "TaskBar/Chat_Button_03.sub",
+		},
+		{
 			"name" : "CharacterButton",
 			"type" : "button",
 

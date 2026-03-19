@@ -412,10 +412,11 @@ class TaskBar(ui.ScriptWindow):
 	BUTTON_INVENTORY = 1
 	BUTTON_MESSENGER = 2
 	BUTTON_SYSTEM = 3
-	BUTTON_CHAT = 4
-	BUTTON_EXPAND = 4
+	BUTTON_DAILY_QUEST = 4
+	BUTTON_CHAT = 5
+	BUTTON_EXPAND = 5
 	if app.ENABLE_GEM_SYSTEM:
-		BUTTON_EXPAND_MONEY = 5
+		BUTTON_EXPAND_MONEY = 6
 	IS_EXPANDED = True
 
 	MOUSE_BUTTON_LEFT = 0
@@ -646,6 +647,10 @@ class TaskBar(ui.ScriptWindow):
 		toggleButtonDict[TaskBar.BUTTON_INVENTORY] = self.GetChild("InventoryButton")
 		toggleButtonDict[TaskBar.BUTTON_MESSENGER] = self.GetChild("MessengerButton")
 		toggleButtonDict[TaskBar.BUTTON_SYSTEM] = self.GetChild("SystemButton")
+		try:
+			toggleButtonDict[TaskBar.BUTTON_DAILY_QUEST] = self.GetChild("DailyQuestButton")
+		except:
+			pass
 
 		# ChatButton, ExpandButton 둘 중 하나는 반드시 존재한다.
 		try:
