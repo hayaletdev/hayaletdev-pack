@@ -33,7 +33,11 @@ import uiAffectShower
 import uiPlayerGauge
 import uiCharacter
 import uiTarget
-import uiDailyQuest
+
+try:
+	import uiDailyQuest
+except ImportError:
+	uiDailyQuest = None
 
 # PRIVATE_SHOP_PRICE_LIST
 import uiPrivateShopBuilder
@@ -2291,6 +2295,11 @@ class GameWindow(ui.ScriptWindow):
 		self.interface.missionBoard.CleanMission()
 
 	def __OpenDailyQuestDialog(self):
+		if not uiDailyQuest:
+			self.interface.OpenCharacterWindowWithState("QUEST")
+			chat.AppendChat(chat.CHAT_TYPE_INFO, "Daily Quest UI module not found.")
+			return
+
 		if not self.dailyQuestWindow:
 			self.dailyQuestWindow = uiDailyQuest.DailyQuestWindow(self.interface)
 
