@@ -291,6 +291,8 @@ class Interface(object):
 			if self.wndInventory:
 				self.wndInventory.SetExpandedMoneyBar(self.wndExpandedMoneyTaskBar)
 
+		self.wndDailyQuest = uidailyquest.DailyQuestWindow(self)
+
 	def __MakeParty(self):
 		wndParty = uiParty.PartyWindow()
 		wndParty.Hide()
@@ -1697,9 +1699,6 @@ class Interface(object):
 		self.dlgSystem.SetTop()
 
 	def ToggleDailyQuestWindow(self):
-		if not self.wndDailyQuest:
-			self.wndDailyQuest = uidailyquest.DailyQuestWindow(self)
-
 		if self.wndDailyQuest.IsShow():
 			self.wndDailyQuest.Close()
 		else:

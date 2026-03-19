@@ -165,13 +165,8 @@ class DailyQuestWindow(ui.ScriptWindow):
 		if not self.questListBox:
 			return
 
-		active_daily_quest_index_list = self.__CollectActiveDailyQuestIndices()
-		for quest_index in active_daily_quest_index_list:
-			self.__SyncQuestData(quest_index)
-
 		for quest_index in self.dailyQuestDict.keys():
-			if not quest_index in active_daily_quest_index_list:
-				del self.dailyQuestDict[quest_index]
+			self.__SyncQuestData(quest_index)
 
 		self.questListBox.RemoveAllItems()
 
@@ -217,34 +212,6 @@ class DailyQuestWindow(ui.ScriptWindow):
 			return
 
 		event.QuestButtonClick(-2147483648 + self.selectedQuestIndex)
-
-	def __CollectActiveDailyQuestIndices(self):
-		quest_index_list = []
-
-		try:
-			quest_count = quest.GetQuestCount()
-		except:
-			return quest_index_list
-
-		for slot_index in xrange(quest_count):
-			try:
-				quest_index = quest.GetQuestIndex(slot_index)
-			except:
-				quest_index = slot_index
-
-			if quest_index <= 0:
-				continue
-
-			try:
-				quest_data = quest.GetQuestData(quest_index)
-				if len(quest_data) >= 6 and quest_data[0] != quest.QUEST_TYPE_DAILY:
-					continue
-			except:
-				continue
-
-			quest_index_list.append(quest_index)
-
-		return quest_index_list
 
 	def __SyncQuestData(self, quest_index):
 		try:
