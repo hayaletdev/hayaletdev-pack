@@ -38,9 +38,9 @@ window = {
 
 					"tooltip_text" : "Gunluk Gorevler",
 
-					"default_image" : "d:/ymir work/ui/game/quest/scroll_close_blue.tga",
-					"over_image" : "d:/ymir work/ui/game/quest/scroll_open_blue.tga",
-					"down_image" : "d:/ymir work/ui/game/quest/scroll_close_blue.tga",
+					"default_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_01.tga",
+					"over_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_02.tga",
+					"down_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_03.tga",
 				},
 				{
 					"name" : "DragonSoulButton",

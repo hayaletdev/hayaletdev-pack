@@ -274,10 +274,7 @@ class Interface(object):
 			self.wndExpandedTaskBar = uiTaskBar.ExpandedTaskBar()
 			self.wndExpandedTaskBar.LoadWindow()
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DRAGON_SOUL, ui.__mem_func__(self.ToggleDragonSoulWindow))
-			try:
-				self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DAILY_QUEST, ui.__mem_func__(self.ToggleDailyQuestWindow))
-			except:
-				pass
+			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DAILY_QUEST, ui.__mem_func__(self.ToggleDailyQuestWindow))
 		else:
 			self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_CHAT, ui.__mem_func__(self.ToggleChat))
 

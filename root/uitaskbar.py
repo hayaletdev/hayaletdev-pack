@@ -349,11 +349,9 @@ class ExpandedTaskBar(ui.ScriptWindow):
 		self.toggleButtonDict = {}
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DRAGON_SOUL] = self.GetChild("DragonSoulButton")
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DRAGON_SOUL].SetParent(self)
-		try:
-			self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST] = self.GetChild("DailyQuestButton")
-			self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST].SetParent(self)
-		except:
-			pass
+		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST] = self.GetChild("DailyQuestButton")
+		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST].SetParent(self)
+
 
 		# 버튼의 위치를 다시 조정해 주는 함수
 		# 마지막에 호출 되어야 한다.
