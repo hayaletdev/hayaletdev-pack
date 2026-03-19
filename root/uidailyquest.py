@@ -1,51 +1,31 @@
+import item
+import nonplayer
+import player
 import ui
 
 
-class DailyQuestItem(ui.ListBoxEx.Item):
-	def __init__(self, title_text, progress_text, detail_text, is_completed):
-		ui.ListBoxEx.Item.__init__(self)
-
-		self.titleText = self.__CreateTextLine(8, 2, title_text)
-		self.progressText = self.__CreateTextLine(8, 18, progress_text, 0.82, 0.82, 0.82)
-		self.detailText = self.__CreateTextLine(8, 32, detail_text, 0.67, 0.88, 1.0)
-
-		if is_completed:
-			self.titleText.SetFontColor(0.5, 1.0, 0.5)
-
-	def __del__(self):
-		ui.ListBoxEx.Item.__del__(self)
-
-	def __CreateTextLine(self, x, y, text, r = 1.0, g = 1.0, b = 1.0):
-		text_line = ui.TextLine()
-		text_line.SetParent(self)
-		text_line.SetPosition(x, y)
-		text_line.SetText(text)
-		text_line.SetFontColor(r, g, b)
-		text_line.Show()
-		return text_line
-
-
 class DailyQuestWindow(ui.ScriptWindow):
-	LIST_X = 18
-	LIST_Y = 95
-	LIST_ITEM_WIDTH = 300
-	LIST_ITEM_HEIGHT = 46
-	LIST_ITEM_STEP = 48
-	LIST_VIEW_COUNT = 5
-
 	def __init__(self, interface):
 		ui.ScriptWindow.__init__(self)
 
 		self.interface = interface
 		self.isLoaded = 0
+		self.itemToolTip = None
 
 		self.board = None
-		self.scrollBar = None
 		self.infoText = None
 		self.helpText = None
 		self.openQuestButton = None
 		self.refreshButton = None
-		self.questListBox = None
+
+		self.targetValueText = None
+		self.progressGauge = None
+		self.progressValueText = None
+		self.stateValueText = None
+
+		self.rewardSlot = None
+		self.rewardNameText = None
+		self.rewardCountText = None
 
 		self.hasData = 0
 		self.targetMobVnum = 0
@@ -70,39 +50,54 @@ class DailyQuestWindow(ui.ScriptWindow):
 		pyScrLoader.LoadScriptFile(self, "uiscript/dailyquestwindow.py")
 
 		self.board = self.GetChild("board")
-		self.scrollBar = self.GetChild("ScrollBar")
 		self.infoText = self.GetChild("QuestInfoText")
 		self.helpText = self.GetChild("QuestHelpText")
 		self.openQuestButton = self.GetChild("OpenQuestButton")
 		self.refreshButton = self.GetChild("RefreshButton")
 
+		self.targetValueText = self.GetChild("MissionTargetValue")
+		self.progressGauge = self.GetChild("MissionProgressGauge")
+		self.progressValueText = self.GetChild("MissionProgressValue")
+		self.stateValueText = self.GetChild("MissionStateValue")
+
+		self.rewardSlot = self.GetChild("RewardSlot")
+		self.rewardNameText = self.GetChild("RewardNameValue")
+		self.rewardCountText = self.GetChild("RewardCountValue")
+
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
 		self.openQuestButton.SetEvent(ui.__mem_func__(self.Close))
-		self.openQuestButton.SetText("Kapat")
 		self.refreshButton.SetEvent(ui.__mem_func__(self.RefreshQuestList))
 
-		self.questListBox = ui.ListBoxEx()
-		self.questListBox.SetParent(self)
-		self.questListBox.SetPosition(self.LIST_X, self.LIST_Y)
-		self.questListBox.SetItemSize(self.LIST_ITEM_WIDTH, self.LIST_ITEM_HEIGHT)
-		self.questListBox.SetItemStep(self.LIST_ITEM_STEP)
-		self.questListBox.SetViewItemCount(self.LIST_VIEW_COUNT)
-		self.questListBox.SetScrollBar(self.scrollBar)
-		self.questListBox.Show()
+		if self.rewardSlot:
+			self.rewardSlot.SetOverInItemEvent(ui.__mem_func__(self.__OnOverInRewardSlot))
+			self.rewardSlot.SetOverOutItemEvent(ui.__mem_func__(self.__OnOverOutRewardSlot))
 
 		self.SetCenterPosition()
 		self.Hide()
 
 	def Destroy(self):
 		self.ClearDictionary()
+
+		self.interface = None
+		self.itemToolTip = None
+
 		self.board = None
-		self.scrollBar = None
 		self.infoText = None
 		self.helpText = None
 		self.openQuestButton = None
 		self.refreshButton = None
-		self.questListBox = None
-		self.interface = None
+
+		self.targetValueText = None
+		self.progressGauge = None
+		self.progressValueText = None
+		self.stateValueText = None
+
+		self.rewardSlot = None
+		self.rewardNameText = None
+		self.rewardCountText = None
+
+	def SetItemToolTip(self, tooltip):
+		self.itemToolTip = tooltip
 
 	def Open(self):
 		self.RefreshQuestList()
@@ -110,6 +105,7 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.SetTop()
 
 	def Close(self):
+		self.__OnOverOutRewardSlot()
 		self.Hide()
 
 	def OnPressEscapeKey(self):
@@ -138,29 +134,101 @@ class DailyQuestWindow(ui.ScriptWindow):
 			self.RefreshQuestList()
 
 	def RefreshQuestList(self):
-		if not self.questListBox:
+		if not self.infoText:
 			return
-
-		self.questListBox.RemoveAllItems()
 
 		if not self.hasData:
 			self.infoText.SetText("Active Daily Quests: 0")
 			self.helpText.SetText("Gunluk gorev verisi bekleniyor...")
+			self.targetValueText.SetText("-")
+			self.progressGauge.SetPercentage(0, 1)
+			self.progressValueText.SetText("0 / 0")
+			self.stateValueText.SetText("-")
+			self.rewardNameText.SetText("Odul Yok")
+			self.rewardCountText.SetText("x0")
+			self.__RefreshRewardSlot(0, 0)
 			return
 
+		self.infoText.SetText("Active Daily Quests: 1")
+		self.helpText.SetText("Gorev tamamlaninca odul otomatik teslim edilir.")
+
+		self.targetValueText.SetText(self.__GetTargetNameText(self.targetMobVnum))
+		self.progressGauge.SetPercentage(self.progressCount, max(1, self.targetCount))
+		self.progressValueText.SetText("%d / %d" % (self.progressCount, self.targetCount))
+
 		state_text = "Devam ediyor"
+		state_color = (1.0, 0.90, 0.45)
 		if self.isClaimed == 1:
 			state_text = "Odul verildi"
+			state_color = (0.55, 1.0, 0.55)
 		elif self.progressCount >= self.targetCount:
 			state_text = "Tamamlandi"
+			state_color = (0.67, 0.88, 1.0)
 
-		item = DailyQuestItem(
-			"Hedef Canavar VNUM: %d" % self.targetMobVnum,
-			"Ilerleme: %d / %d" % (self.progressCount, self.targetCount),
-			"Odul: %d x%d | Durum: %s" % (self.rewardVnum, self.rewardCount, state_text),
-			self.isClaimed == 1
-		)
-		self.questListBox.AppendItem(item)
+		self.stateValueText.SetText(state_text)
+		self.stateValueText.SetFontColor(state_color[0], state_color[1], state_color[2])
 
-		self.infoText.SetText("Active Daily Quests: 1")
-		self.helpText.SetText("Hedefi tamamla. Odul otomatik verilir.")
+		self.rewardNameText.SetText(self.__GetRewardNameText(self.rewardVnum))
+		self.rewardCountText.SetText("x%d" % self.rewardCount)
+		self.__RefreshRewardSlot(self.rewardVnum, self.rewardCount)
+
+	def __RefreshRewardSlot(self, reward_vnum, reward_count):
+		if not self.rewardSlot:
+			return
+
+		self.rewardSlot.ClearSlot(0)
+		if reward_vnum > 0 and reward_count > 0:
+			self.rewardSlot.SetItemSlot(0, reward_vnum, reward_count)
+		self.rewardSlot.RefreshSlot()
+
+	def __GetTargetNameText(self, mob_vnum):
+		if mob_vnum <= 0:
+			return "Hedef: -"
+
+		try:
+			mob_name = nonplayer.GetMonsterName(mob_vnum)
+		except:
+			mob_name = ""
+
+		if not mob_name:
+			return "Hedef VNUM: %d" % mob_vnum
+
+		return "Hedef: %s (%d)" % (mob_name, mob_vnum)
+
+	def __GetRewardNameText(self, reward_vnum):
+		if reward_vnum <= 0:
+			return "Odul Yok"
+
+		try:
+			item.SelectItem(reward_vnum)
+			reward_name = item.GetItemName()
+		except:
+			reward_name = ""
+
+		if not reward_name:
+			return "Item VNUM: %d" % reward_vnum
+
+		return reward_name
+
+	def __OnOverInRewardSlot(self, slot_index):
+		if not self.itemToolTip and self.interface:
+			try:
+				self.itemToolTip = self.interface.tooltipItem
+			except:
+				self.itemToolTip = None
+
+		if not self.itemToolTip:
+			return
+
+		if self.rewardVnum <= 0:
+			return
+
+		metin_slot = [0 for i in xrange(player.METIN_SOCKET_MAX_NUM)]
+		attr_slot = [(0, 0) for i in xrange(player.ATTRIBUTE_SLOT_MAX_NUM)]
+
+		self.itemToolTip.ClearToolTip()
+		self.itemToolTip.AddItemData(self.rewardVnum, metin_slot, attr_slot)
+
+	def __OnOverOutRewardSlot(self):
+		if self.itemToolTip:
+			self.itemToolTip.HideToolTip()
