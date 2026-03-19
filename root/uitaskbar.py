@@ -339,7 +339,7 @@ class ExpandedTaskBar(ui.ScriptWindow):
 	def LoadWindow(self):
 		try:
 			pyScrLoader = ui.PythonScriptLoader()
-			pyScrLoader.LoadScriptFile(self, uiScriptLocale.LOCALE_COMMON_UISCRIPT_PATH + "ExpandedTaskBar.py")
+			pyScrLoader.LoadScriptFile(self, "UIScript/ExpandedTaskBar.py")
 		except:
 			import exception
 			exception.Abort("ExpandedTaskBar.LoadWindow.LoadObject")
