@@ -31,6 +31,7 @@ import uiParty
 import uiSafebox
 import uiGuild
 import uiQuest
+import uidailyquest
 import uiPrivateShopBuilder
 import uiCommon
 import uiRefine
@@ -163,6 +164,7 @@ class Interface(object):
 		self.listGMName = {}
 		self.wndQuestWindow = {}
 		self.wndQuestWindowNewKey = 0
+		self.wndDailyQuest = None
 		self.privateShopAdvertisementBoardDict = {}
 		self.guildScoreBoardDict = {}
 		self.equipmentDialogDict = {}
@@ -272,6 +274,7 @@ class Interface(object):
 			self.wndExpandedTaskBar = uiTaskBar.ExpandedTaskBar()
 			self.wndExpandedTaskBar.LoadWindow()
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DRAGON_SOUL, ui.__mem_func__(self.ToggleDragonSoulWindow))
+			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DAILY_QUEST, ui.__mem_func__(self.ToggleDailyQuestWindow))
 		else:
 			self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_CHAT, ui.__mem_func__(self.ToggleChat))
 
@@ -287,6 +290,8 @@ class Interface(object):
 			self.wndExpandedMoneyTaskBar.LoadWindow()
 			if self.wndInventory:
 				self.wndInventory.SetExpandedMoneyBar(self.wndExpandedMoneyTaskBar)
+
+		self.wndDailyQuest = uidailyquest.DailyQuestWindow(self)
 
 	def __MakeParty(self):
 		wndParty = uiParty.PartyWindow()
@@ -705,6 +710,10 @@ class Interface(object):
 				eachQuestWindow = None
 		self.wndQuestWindow = {}
 
+		if self.wndDailyQuest:
+			self.wndDailyQuest.Destroy()
+			self.wndDailyQuest = None
+
 		if self.wndChat:
 			self.wndChat.Destroy()
 
@@ -916,6 +925,8 @@ class Interface(object):
 		del self.wndUICurtain
 		del self.wndChat
 		del self.wndTaskBar
+		if self.wndDailyQuest:
+			del self.wndDailyQuest
 		if self.wndExpandedTaskBar:
 			del self.wndExpandedTaskBar
 
@@ -1086,6 +1097,8 @@ class Interface(object):
 	if not app.ENABLE_QUEST_RENEWAL:
 		def RefreshQuest(self):
 			self.wndCharacter.RefreshQuest()
+			if self.wndDailyQuest and self.wndDailyQuest.IsShow():
+				self.wndDailyQuest.RefreshQuestList()
 
 	def RefreshSafebox(self):
 		self.wndSafebox.RefreshSafebox()
@@ -1684,6 +1697,16 @@ class Interface(object):
 	def OpenSystemDialog(self):
 		self.dlgSystem.OpenDialog()
 		self.dlgSystem.SetTop()
+
+	def ToggleDailyQuestWindow(self):
+		if self.wndDailyQuest.IsShow():
+			self.wndDailyQuest.Close()
+		else:
+			self.wndDailyQuest.Open()
+
+	def UpdateDailyQuestData(self, mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed):
+		if self.wndDailyQuest:
+			self.wndDailyQuest.SetDailyQuestData(mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed)
 
 	def ToggleMessenger(self):
 		if self.wndMessenger.IsShow():
@@ -2349,11 +2372,17 @@ class Interface(object):
 		def RefreshQuest(self, quest_type, quest_index):
 			self.wndCharacter.RefreshQuest(quest_type, quest_index)
 
+			if self.wndDailyQuest:
+				self.wndDailyQuest.OnQuestRefresh(quest_type, quest_index)
+
 			# Refresh quest button.
 			self.__RefreshQuestButton()
 
 		def DeleteQuest(self, quest_type, quest_index):
 			self.wndCharacter.DeleteQuest(quest_type, quest_index)
+
+			if self.wndDailyQuest:
+				self.wndDailyQuest.OnQuestDelete(quest_type, quest_index)
 
 		# Unused.
 		def ShowQuestButton(self):

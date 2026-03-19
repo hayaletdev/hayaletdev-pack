@@ -99,6 +99,7 @@ class GameWindow(ui.ScriptWindow):
 
 		self.quickSlotPageIndex = 0
 		self.lastPKModeSendedTime = 0
+		self.lastNotifiedPKMode = -1
 		self.pressNumber = None
 
 		self.guildWarQuestionDialog = None
@@ -319,7 +320,6 @@ class GameWindow(ui.ScriptWindow):
 		self.guildInviteQuestionDialog = None
 		self.guildWarQuestionDialog = None
 		self.messengerAddFriendQuestion = None
-
 		# UNKNOWN_UPDATE
 		self.itemDropQuestionDialog = None
 		if app.ENABLE_NEW_DROP_DIALOG:
@@ -739,13 +739,19 @@ class GameWindow(ui.ScriptWindow):
 
 	def OnChangePKMode(self):
 		self.interface.OnChangePKMode()
+		curPKMode = player.GetPKMode()
+
+		if self.lastNotifiedPKMode == curPKMode:
+			return
+
+		self.lastNotifiedPKMode = curPKMode
 
 		try:
 			if player.GetStatus(player.LEVEL) < constInfo.PVPMODE_PROTECTED_LEVEL:
-				self.__NotifyError(localeInfo.OPTION_PVPMODE_MESSAGE_DICT[player.GetPKMode()])
+				self.__NotifyError(localeInfo.OPTION_PVPMODE_MESSAGE_DICT[curPKMode])
 				return
 		except KeyError:
-			print "UNKNOWN PVPMode[%d]" % (player.GetPKMode())
+			print "UNKNOWN PVPMode[%d]" % (curPKMode)
 
 		#if constInfo.PVPMODE_TEST_ENABLE:
 		#	curPKMode = player.GetPKMode()
@@ -2274,6 +2280,14 @@ class GameWindow(ui.ScriptWindow):
 	def BINARY_CleanMissionMessage(self):
 		self.interface.missionBoard.CleanMission()
 
+	def __OpenDailyQuestDialog(self):
+		if self.interface:
+			self.interface.ToggleDailyQuestWindow()
+
+	def __DailyQuestData(self, mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed):
+		if self.interface:
+			self.interface.UpdateDailyQuestData(mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed)
+
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:
 			return
@@ -2426,6 +2440,8 @@ class GameWindow(ui.ScriptWindow):
 			"SetMissionMessage" : self.BINARY_SetMissionMessage,
 			"SetSubMissionMessage" : self.BINARY_SetSubMissionMessage,
 			"CleanMissionMessage" : self.BINARY_CleanMissionMessage,
+			"OpenDailyQuestDialog" : self.__OpenDailyQuestDialog,
+			"DailyQuestData" : self.__DailyQuestData,
 		})
 
 		serverCommandList["OpenCostumeWindow"] = self.OpenCostumeWindow

@@ -9,7 +9,7 @@ window = {
 	"x" : SCREEN_WIDTH/2 - 5,
 	"y" : SCREEN_HEIGHT - 74,
 
-	"width" : 37,
+	"width" : 73,
 	"height" : 37,
 
 	"children" :
@@ -21,11 +21,27 @@ window = {
 			"x" : 0,
 			"y" : 0,
 
-			"width" : 37,
+			"width" : 73,
 			"height" : 37,
 
 			"children" :
 			(
+				{
+					"name" : "DailyQuestButton",
+					"type" : "button",
+
+					"x" : 0,
+					"y" : 0,
+
+					"width" : 37,
+					"height" : 37,
+
+					"tooltip_text" : "Gunluk Gorevler",
+
+					"default_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_01.tga",
+					"over_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_02.tga",
+					"down_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_03.tga",
+				},
 				{
 					"name" : "DragonSoulButton",
 					"type" : "button",

@@ -325,6 +325,7 @@ if app.ENABLE_GEM_SYSTEM or app.ENABLE_CHEQUE_SYSTEM:
 
 class ExpandedTaskBar(ui.ScriptWindow):
 	BUTTON_DRAGON_SOUL = 0
+	BUTTON_DAILY_QUEST = 1
 
 	def __init__(self):
 		ui.Window.__init__(self)
@@ -338,7 +339,7 @@ class ExpandedTaskBar(ui.ScriptWindow):
 	def LoadWindow(self):
 		try:
 			pyScrLoader = ui.PythonScriptLoader()
-			pyScrLoader.LoadScriptFile(self, uiScriptLocale.LOCALE_COMMON_UISCRIPT_PATH + "ExpandedTaskBar.py")
+			pyScrLoader.LoadScriptFile(self, "UIScript/ExpandedTaskBar.py")
 		except:
 			import exception
 			exception.Abort("ExpandedTaskBar.LoadWindow.LoadObject")
@@ -348,6 +349,9 @@ class ExpandedTaskBar(ui.ScriptWindow):
 		self.toggleButtonDict = {}
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DRAGON_SOUL] = self.GetChild("DragonSoulButton")
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DRAGON_SOUL].SetParent(self)
+		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST] = self.GetChild("DailyQuestButton")
+		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST].SetParent(self)
+
 
 		# 버튼의 위치를 다시 조정해 주는 함수
 		# 마지막에 호출 되어야 한다.
@@ -360,6 +364,8 @@ class ExpandedTaskBar(ui.ScriptWindow):
 		button_order = []
 		if not ExpandedTaskBar.BUTTON_DRAGON_SOUL in self.exclusion_list:
 			button_order.append(ExpandedTaskBar.BUTTON_DRAGON_SOUL)
+		if not ExpandedTaskBar.BUTTON_DAILY_QUEST in self.exclusion_list and self.toggleButtonDict.has_key(ExpandedTaskBar.BUTTON_DAILY_QUEST):
+			button_order.append(ExpandedTaskBar.BUTTON_DAILY_QUEST)
 
 		## 부모 window 의 position 을 다시 계산
 		total_count = len(button_order) # 정렬할 총 개수
