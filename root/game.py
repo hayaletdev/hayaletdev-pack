@@ -33,6 +33,7 @@ import uiAffectShower
 import uiPlayerGauge
 import uiCharacter
 import uiTarget
+import uiDailyQuest
 
 # PRIVATE_SHOP_PRICE_LIST
 import uiPrivateShopBuilder
@@ -99,6 +100,7 @@ class GameWindow(ui.ScriptWindow):
 
 		self.quickSlotPageIndex = 0
 		self.lastPKModeSendedTime = 0
+		self.lastNotifiedPKMode = -1
 		self.pressNumber = None
 
 		self.guildWarQuestionDialog = None
@@ -162,6 +164,7 @@ class GameWindow(ui.ScriptWindow):
 
 		self.partyRequestQuestionDialog = None
 		self.partyInviteQuestionDialog = None
+		self.dailyQuestWindow = None
 
 	def __del__(self):
 		player.SetGameWindow(0)
@@ -319,6 +322,9 @@ class GameWindow(ui.ScriptWindow):
 		self.guildInviteQuestionDialog = None
 		self.guildWarQuestionDialog = None
 		self.messengerAddFriendQuestion = None
+		if self.dailyQuestWindow:
+			self.dailyQuestWindow.Destroy()
+		self.dailyQuestWindow = None
 
 		# UNKNOWN_UPDATE
 		self.itemDropQuestionDialog = None
@@ -739,13 +745,19 @@ class GameWindow(ui.ScriptWindow):
 
 	def OnChangePKMode(self):
 		self.interface.OnChangePKMode()
+		curPKMode = player.GetPKMode()
+
+		if self.lastNotifiedPKMode == curPKMode:
+			return
+
+		self.lastNotifiedPKMode = curPKMode
 
 		try:
 			if player.GetStatus(player.LEVEL) < constInfo.PVPMODE_PROTECTED_LEVEL:
-				self.__NotifyError(localeInfo.OPTION_PVPMODE_MESSAGE_DICT[player.GetPKMode()])
+				self.__NotifyError(localeInfo.OPTION_PVPMODE_MESSAGE_DICT[curPKMode])
 				return
 		except KeyError:
-			print "UNKNOWN PVPMode[%d]" % (player.GetPKMode())
+			print "UNKNOWN PVPMode[%d]" % (curPKMode)
 
 		#if constInfo.PVPMODE_TEST_ENABLE:
 		#	curPKMode = player.GetPKMode()
@@ -793,9 +805,13 @@ class GameWindow(ui.ScriptWindow):
 	if app.ENABLE_QUEST_RENEWAL:
 		def RefreshQuest(self, quest_type, quest_index):
 			self.interface.RefreshQuest(quest_type, quest_index)
+			if self.dailyQuestWindow:
+				self.dailyQuestWindow.OnQuestRefresh(quest_type, quest_index)
 
 		def DeleteQuest(self, quest_type, quest_index):
 			self.interface.DeleteQuest(quest_type, quest_index)
+			if self.dailyQuestWindow:
+				self.dailyQuestWindow.OnQuestDelete(quest_type, quest_index)
 	else:
 		def RefreshQuest(self):
 			self.interface.RefreshQuest()
@@ -2274,6 +2290,15 @@ class GameWindow(ui.ScriptWindow):
 	def BINARY_CleanMissionMessage(self):
 		self.interface.missionBoard.CleanMission()
 
+	def __OpenDailyQuestDialog(self):
+		if not self.dailyQuestWindow:
+			self.dailyQuestWindow = uiDailyQuest.DailyQuestWindow(self.interface)
+
+		if self.dailyQuestWindow.IsShow():
+			self.dailyQuestWindow.Hide()
+		else:
+			self.dailyQuestWindow.Open()
+
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:
 			return
@@ -2426,6 +2451,7 @@ class GameWindow(ui.ScriptWindow):
 			"SetMissionMessage" : self.BINARY_SetMissionMessage,
 			"SetSubMissionMessage" : self.BINARY_SetSubMissionMessage,
 			"CleanMissionMessage" : self.BINARY_CleanMissionMessage,
+			"OpenDailyQuestDialog" : self.__OpenDailyQuestDialog,
 		})
 
 		serverCommandList["OpenCostumeWindow"] = self.OpenCostumeWindow
