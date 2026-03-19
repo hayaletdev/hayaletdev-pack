@@ -16,11 +16,12 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.infoText = None
 		self.helpText = None
 		self.openQuestButton = None
-		self.refreshButton = None
+		self.randomRewardButton = None
 
 		self.targetValueText = None
 		self.progressGauge = None
 		self.progressValueText = None
+		self.remainValueText = None
 		self.stateValueText = None
 
 		self.rewardSlot = None
@@ -53,11 +54,12 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.infoText = self.GetChild("QuestInfoText")
 		self.helpText = self.GetChild("QuestHelpText")
 		self.openQuestButton = self.GetChild("OpenQuestButton")
-		self.refreshButton = self.GetChild("RefreshButton")
+		self.randomRewardButton = self.GetChild("RandomRewardButton")
 
 		self.targetValueText = self.GetChild("MissionTargetValue")
 		self.progressGauge = self.GetChild("MissionProgressGauge")
 		self.progressValueText = self.GetChild("MissionProgressValue")
+		self.remainValueText = self.GetChild("MissionRemainValue")
 		self.stateValueText = self.GetChild("MissionStateValue")
 
 		self.rewardSlot = self.GetChild("RewardSlot")
@@ -66,7 +68,7 @@ class DailyQuestWindow(ui.ScriptWindow):
 
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
 		self.openQuestButton.SetEvent(ui.__mem_func__(self.Close))
-		self.refreshButton.SetEvent(ui.__mem_func__(self.RefreshQuestList))
+		self.randomRewardButton.SetEvent(ui.__mem_func__(self.RefreshQuestList))
 
 		if self.rewardSlot:
 			self.rewardSlot.SetOverInItemEvent(ui.__mem_func__(self.__OnOverInRewardSlot))
@@ -85,11 +87,12 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.infoText = None
 		self.helpText = None
 		self.openQuestButton = None
-		self.refreshButton = None
+		self.randomRewardButton = None
 
 		self.targetValueText = None
 		self.progressGauge = None
 		self.progressValueText = None
+		self.remainValueText = None
 		self.stateValueText = None
 
 		self.rewardSlot = None
@@ -143,6 +146,7 @@ class DailyQuestWindow(ui.ScriptWindow):
 			self.targetValueText.SetText("-")
 			self.progressGauge.SetPercentage(0, 1)
 			self.progressValueText.SetText("0 / 0")
+			self.remainValueText.SetText("Kalan: 0")
 			self.stateValueText.SetText("-")
 			self.rewardNameText.SetText("Odul Yok")
 			self.rewardCountText.SetText("x0")
@@ -155,6 +159,7 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.targetValueText.SetText(self.__GetTargetNameText(self.targetMobVnum))
 		self.progressGauge.SetPercentage(self.progressCount, max(1, self.targetCount))
 		self.progressValueText.SetText("%d / %d" % (self.progressCount, self.targetCount))
+		self.remainValueText.SetText("Kalan: %d" % max(0, self.targetCount - self.progressCount))
 
 		state_text = "Devam ediyor"
 		state_color = (1.0, 0.90, 0.45)
@@ -176,7 +181,9 @@ class DailyQuestWindow(ui.ScriptWindow):
 		if not self.rewardSlot:
 			return
 
-		self.rewardSlot.ClearSlot(0)
+		for slot_index in xrange(9):
+			self.rewardSlot.ClearSlot(slot_index)
+
 		if reward_vnum > 0 and reward_count > 0:
 			self.rewardSlot.SetItemSlot(0, reward_vnum, reward_count)
 		self.rewardSlot.RefreshSlot()
@@ -221,6 +228,8 @@ class DailyQuestWindow(ui.ScriptWindow):
 			return
 
 		if self.rewardVnum <= 0:
+			return
+		if slot_index != 0:
 			return
 
 		metin_slot = [0 for i in xrange(player.METIN_SOCKET_MAX_NUM)]
