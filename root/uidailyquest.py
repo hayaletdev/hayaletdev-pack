@@ -79,7 +79,7 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.isLoaded = 1
 
 		pyScrLoader = ui.PythonScriptLoader()
-		pyScrLoader.LoadScriptFile(self, "UIScript/DailyQuestWindow.py")
+		pyScrLoader.LoadScriptFile(self, "uiscript/dailyquestwindow.py")
 
 		self.board = self.GetChild("board")
 		self.scrollBar = self.GetChild("ScrollBar")
