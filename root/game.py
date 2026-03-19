@@ -2284,6 +2284,10 @@ class GameWindow(ui.ScriptWindow):
 		if self.interface:
 			self.interface.ToggleDailyQuestWindow()
 
+	def __DailyQuestData(self, mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed):
+		if self.interface:
+			self.interface.UpdateDailyQuestData(mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed)
+
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:
 			return
@@ -2437,6 +2441,7 @@ class GameWindow(ui.ScriptWindow):
 			"SetSubMissionMessage" : self.BINARY_SetSubMissionMessage,
 			"CleanMissionMessage" : self.BINARY_CleanMissionMessage,
 			"OpenDailyQuestDialog" : self.__OpenDailyQuestDialog,
+			"DailyQuestData" : self.__DailyQuestData,
 		})
 
 		serverCommandList["OpenCostumeWindow"] = self.OpenCostumeWindow

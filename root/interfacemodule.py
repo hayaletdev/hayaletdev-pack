@@ -1704,6 +1704,10 @@ class Interface(object):
 		else:
 			self.wndDailyQuest.Open()
 
+	def UpdateDailyQuestData(self, mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed):
+		if self.wndDailyQuest:
+			self.wndDailyQuest.SetDailyQuestData(mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed)
+
 	def ToggleMessenger(self):
 		if self.wndMessenger.IsShow():
 			self.wndMessenger.Hide()

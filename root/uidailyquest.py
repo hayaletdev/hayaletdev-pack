@@ -1,35 +1,19 @@
-import app
-import event
-import localeInfo
-import quest
 import ui
 
 
 class DailyQuestItem(ui.ListBoxEx.Item):
-	def __init__(self, quest_index, quest_name, progress_text, remain_text, is_confirmed):
+	def __init__(self, title_text, progress_text, detail_text, is_completed):
 		ui.ListBoxEx.Item.__init__(self)
 
-		self.quest_index = quest_index
-		self.quest_name = quest_name
-		self.progress_text = progress_text
-		self.remain_text = remain_text
-		self.is_confirmed = is_confirmed
-
-		self.titleText = self.__CreateTextLine(8, 2, quest_name)
+		self.titleText = self.__CreateTextLine(8, 2, title_text)
 		self.progressText = self.__CreateTextLine(8, 18, progress_text, 0.82, 0.82, 0.82)
-		self.remainText = self.__CreateTextLine(8, 32, remain_text, 0.67, 0.88, 1.0)
+		self.detailText = self.__CreateTextLine(8, 32, detail_text, 0.67, 0.88, 1.0)
 
-		if not is_confirmed:
-			self.titleText.SetFontColor(1.0, 0.9, 0.45)
+		if is_completed:
+			self.titleText.SetFontColor(0.5, 1.0, 0.5)
 
 	def __del__(self):
 		ui.ListBoxEx.Item.__del__(self)
-
-	def SetSize(self, width, height):
-		ui.ListBoxEx.Item.SetSize(self, width, height)
-
-	def GetQuestIndex(self):
-		return self.quest_index
 
 	def __CreateTextLine(self, x, y, text, r = 1.0, g = 1.0, b = 1.0):
 		text_line = ui.TextLine()
@@ -63,9 +47,13 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.refreshButton = None
 		self.questListBox = None
 
-		self.selectedQuestIndex = 0
-		self.lastUpdateTime = 0
-		self.dailyQuestDict = {}
+		self.hasData = 0
+		self.targetMobVnum = 0
+		self.targetCount = 0
+		self.progressCount = 0
+		self.rewardVnum = 0
+		self.rewardCount = 0
+		self.isClaimed = 0
 
 		self.__LoadWindow()
 
@@ -89,7 +77,8 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.refreshButton = self.GetChild("RefreshButton")
 
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
-		self.openQuestButton.SetEvent(ui.__mem_func__(self.__OpenSelectedQuest))
+		self.openQuestButton.SetEvent(ui.__mem_func__(self.Close))
+		self.openQuestButton.SetText("Kapat")
 		self.refreshButton.SetEvent(ui.__mem_func__(self.RefreshQuestList))
 
 		self.questListBox = ui.ListBoxEx()
@@ -99,7 +88,6 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.questListBox.SetItemStep(self.LIST_ITEM_STEP)
 		self.questListBox.SetViewItemCount(self.LIST_VIEW_COUNT)
 		self.questListBox.SetScrollBar(self.scrollBar)
-		self.questListBox.SetSelectEvent(ui.__mem_func__(self.__OnSelectQuest))
 		self.questListBox.Show()
 
 		self.SetCenterPosition()
@@ -114,7 +102,6 @@ class DailyQuestWindow(ui.ScriptWindow):
 		self.openQuestButton = None
 		self.refreshButton = None
 		self.questListBox = None
-		self.dailyQuestDict = {}
 		self.interface = None
 
 	def Open(self):
@@ -130,132 +117,50 @@ class DailyQuestWindow(ui.ScriptWindow):
 		return True
 
 	def OnQuestRefresh(self, quest_type, quest_index):
-		if quest_type != quest.QUEST_TYPE_DAILY:
-			return
-
-		self.__SyncQuestData(quest_index)
-		if self.IsShow():
-			self.RefreshQuestList()
+		return
 
 	def OnQuestDelete(self, quest_type, quest_index):
-		if quest_type != quest.QUEST_TYPE_DAILY:
-			return
+		return
 
-		if quest_index in self.dailyQuestDict:
-			del self.dailyQuestDict[quest_index]
+	def SetDailyQuestData(self, mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed):
+		self.hasData = 1
+		self.targetMobVnum = int(mob_vnum)
+		self.targetCount = max(0, int(target_count))
+		self.progressCount = max(0, int(progress_count))
+		self.rewardVnum = int(reward_vnum)
+		self.rewardCount = max(1, int(reward_count))
+		self.isClaimed = int(is_claimed)
 
-		if self.selectedQuestIndex == quest_index:
-			self.selectedQuestIndex = 0
+		if self.progressCount > self.targetCount:
+			self.progressCount = self.targetCount
 
 		if self.IsShow():
 			self.RefreshQuestList()
-
-	def OnUpdate(self):
-		if not self.IsShow():
-			return
-
-		current_time = app.GetGlobalTimeStamp()
-		if current_time == self.lastUpdateTime:
-			return
-
-		self.lastUpdateTime = current_time
-		self.RefreshQuestList()
 
 	def RefreshQuestList(self):
 		if not self.questListBox:
 			return
 
-		for quest_index in self.dailyQuestDict.keys():
-			self.__SyncQuestData(quest_index)
-
 		self.questListBox.RemoveAllItems()
 
-		sorted_entries = self.dailyQuestDict.items()
-		sorted_entries.sort(key = lambda entry: entry[0])
-
-		current_selected_index = self.selectedQuestIndex
-		self.selectedQuestIndex = 0
-		for quest_index, data in sorted_entries:
-			progress_text = self.__FormatCounterText(data["counter_name"], data["counter_value"])
-			remain_text = self.__FormatRemainText(data["clock_name"], data["clock_time"])
-
-			item = DailyQuestItem(
-				quest_index,
-				data["name"],
-				progress_text,
-				remain_text,
-				data["is_confirmed"]
-			)
-			self.questListBox.AppendItem(item)
-
-			if current_selected_index == quest_index:
-				self.questListBox.SelectItem(item)
-				self.selectedQuestIndex = quest_index
-
-		quest_count = len(sorted_entries)
-		self.infoText.SetText("Active Daily Quests: %d" % quest_count)
-
-		if quest_count == 0:
-			self.helpText.SetText("No active daily quest. Re-login or wait for reset.")
-		else:
-			self.helpText.SetText("Select a quest and click Open Quest.")
-
-	def __OnSelectQuest(self, item):
-		if not item:
-			self.selectedQuestIndex = 0
+		if not self.hasData:
+			self.infoText.SetText("Active Daily Quests: 0")
+			self.helpText.SetText("Gunluk gorev verisi bekleniyor...")
 			return
 
-		self.selectedQuestIndex = item.GetQuestIndex()
+		state_text = "Devam ediyor"
+		if self.isClaimed == 1:
+			state_text = "Odul verildi"
+		elif self.progressCount >= self.targetCount:
+			state_text = "Tamamlandi"
 
-	def __OpenSelectedQuest(self):
-		if self.selectedQuestIndex <= 0:
-			return
+		item = DailyQuestItem(
+			"Hedef Canavar VNUM: %d" % self.targetMobVnum,
+			"Ilerleme: %d / %d" % (self.progressCount, self.targetCount),
+			"Odul: %d x%d | Durum: %s" % (self.rewardVnum, self.rewardCount, state_text),
+			self.isClaimed == 1
+		)
+		self.questListBox.AppendItem(item)
 
-		event.QuestButtonClick(-2147483648 + self.selectedQuestIndex)
-
-	def __SyncQuestData(self, quest_index):
-		try:
-			quest_data = quest.GetQuestData(quest_index)
-
-			if len(quest_data) >= 6:
-				(quest_type, is_confirmed, quest_name, quest_icon, counter_name, counter_value) = quest_data
-				if quest_type != quest.QUEST_TYPE_DAILY:
-					if quest_index in self.dailyQuestDict:
-						del self.dailyQuestDict[quest_index]
-					return
-			else:
-				(quest_name, quest_icon, counter_name, counter_value) = quest_data
-				is_confirmed = 1
-
-			clock_name = ""
-			clock_time = 0
-			try:
-				(clock_name, clock_time) = quest.GetQuestLastTime(quest_index)
-			except:
-				pass
-
-			self.dailyQuestDict[quest_index] = {
-				"name" : quest_name,
-				"is_confirmed" : is_confirmed,
-				"counter_name" : counter_name,
-				"counter_value" : counter_value,
-				"clock_name" : clock_name,
-				"clock_time" : clock_time,
-			}
-		except:
-			if quest_index in self.dailyQuestDict:
-				del self.dailyQuestDict[quest_index]
-
-	def __FormatCounterText(self, counter_name, counter_value):
-		if len(counter_name) <= 0:
-			return "Progress: -"
-		return "%s: %d" % (counter_name, counter_value)
-
-	def __FormatRemainText(self, clock_name, clock_time):
-		if len(clock_name) <= 0:
-			return localeInfo.QUEST_UNLIMITED_TIME
-
-		if clock_time <= 0:
-			return "%s: %s" % (clock_name, localeInfo.QUEST_TIMEOVER)
-
-		return "%s: %s" % (clock_name, localeInfo.SecondToColonTypeHMS(clock_time))
+		self.infoText.SetText("Active Daily Quests: 1")
+		self.helpText.SetText("Hedefi tamamla. Odul otomatik verilir.")
