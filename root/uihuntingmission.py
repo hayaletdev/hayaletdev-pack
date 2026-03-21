@@ -16,7 +16,6 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.board = None
 		self.infoText = None
 		self.helpText = None
-		self.refreshButton = None
 		self.claimButton = None
 		self.closeButton = None
 
@@ -59,7 +58,6 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.board = self.GetChild("board")
 		self.infoText = self.GetChild("QuestInfoText")
 		self.helpText = self.GetChild("QuestHelpText")
-		self.refreshButton = self.GetChild("RefreshButton")
 		self.claimButton = self.GetChild("ClaimButton")
 		self.closeButton = self.GetChild("CloseButton")
 
@@ -76,7 +74,6 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.rewardCountText = self.GetChild("RewardCountValue")
 
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
-		self.refreshButton.SetEvent(ui.__mem_func__(self.RefreshMissionData))
 		self.claimButton.SetEvent(ui.__mem_func__(self.ClaimReward))
 		self.closeButton.SetEvent(ui.__mem_func__(self.Close))
 
@@ -96,7 +93,6 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.board = None
 		self.infoText = None
 		self.helpText = None
-		self.refreshButton = None
 		self.claimButton = None
 		self.closeButton = None
 

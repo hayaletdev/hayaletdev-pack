@@ -295,23 +295,10 @@ window = {
 					),
 				},
 				{
-					"name" : "RefreshButton",
-					"type" : "button",
-
-					"x" : 16,
-					"y" : 452,
-
-					"text" : "Yenile",
-
-					"default_image" : "d:/ymir work/ui/public/large_button_01.sub",
-					"over_image" : "d:/ymir work/ui/public/large_button_02.sub",
-					"down_image" : "d:/ymir work/ui/public/large_button_03.sub",
-				},
-				{
 					"name" : "ClaimButton",
 					"type" : "button",
 
-					"x" : 81,
+					"x" : 48,
 					"y" : 452,
 
 					"text" : "Odulu Al",
@@ -324,7 +311,7 @@ window = {
 					"name" : "CloseButton",
 					"type" : "button",
 
-					"x" : 146,
+					"x" : 113,
 					"y" : 452,
 
 					"text" : "Kapat",
