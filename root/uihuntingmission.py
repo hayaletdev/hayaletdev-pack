@@ -1,4 +1,5 @@
 import item
+import net
 import nonplayer
 import player
 import ui
@@ -16,6 +17,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.infoText = None
 		self.helpText = None
 		self.refreshButton = None
+		self.claimButton = None
 		self.closeButton = None
 
 		self.indexValueText = None
@@ -58,6 +60,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.infoText = self.GetChild("QuestInfoText")
 		self.helpText = self.GetChild("QuestHelpText")
 		self.refreshButton = self.GetChild("RefreshButton")
+		self.claimButton = self.GetChild("ClaimButton")
 		self.closeButton = self.GetChild("CloseButton")
 
 		self.indexValueText = self.GetChild("MissionIndexValue")
@@ -74,6 +77,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
 		self.refreshButton.SetEvent(ui.__mem_func__(self.RefreshMissionData))
+		self.claimButton.SetEvent(ui.__mem_func__(self.ClaimReward))
 		self.closeButton.SetEvent(ui.__mem_func__(self.Close))
 
 		if self.rewardSlot:
@@ -93,6 +97,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.infoText = None
 		self.helpText = None
 		self.refreshButton = None
+		self.claimButton = None
 		self.closeButton = None
 
 		self.indexValueText = None
@@ -122,6 +127,9 @@ class HuntingMissionWindow(ui.ScriptWindow):
 	def OnPressEscapeKey(self):
 		self.Close()
 		return True
+
+	def ClaimReward(self):
+		net.SendCommandPacket("/hunting_mission_claim")
 
 	def SetHuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim):
 		self.hasData = 1
@@ -157,12 +165,14 @@ class HuntingMissionWindow(ui.ScriptWindow):
 			self.rewardNameText.SetText("Odul Yok")
 			self.rewardCountText.SetText("x0")
 			self.__RefreshRewardSlot(0, 0)
+			if self.claimButton:
+				self.claimButton.Disable()
 			return
 
 		player_level = player.GetStatus(player.LEVEL)
 
 		self.infoText.SetText("Aktif Av Gorevi: 1")
-		self.helpText.SetText("Hedef tamamlaninca odul verilir, sonra siradaki gorev acilir.")
+		self.helpText.SetText("Hedef tamamlaninca Odulu Al ile odulu alip siradaki goreve gec.")
 
 		self.indexValueText.SetText("%d" % self.missionIndex)
 		self.requiredLevelValueText.SetText("%d" % self.requiredLevel)
@@ -186,6 +196,11 @@ class HuntingMissionWindow(ui.ScriptWindow):
 
 		self.stateValueText.SetText(state_text)
 		self.stateValueText.SetFontColor(state_color[0], state_color[1], state_color[2])
+		if self.claimButton:
+			if self.canClaim == 1 and player_level >= self.requiredLevel:
+				self.claimButton.Enable()
+			else:
+				self.claimButton.Disable()
 
 		self.rewardNameText.SetText(self.__GetRewardNameText(self.rewardVnum))
 		self.rewardCountText.SetText("x%d" % max(0, self.rewardCount))

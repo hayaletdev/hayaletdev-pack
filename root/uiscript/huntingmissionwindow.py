@@ -286,7 +286,7 @@ window = {
 
 							"x" : 12,
 							"y" : 338,
-							"text" : "Odul hedef tamamlaninca otomatik verilir.",
+							"text" : "Hedef tamamlaninca Odulu Al butonunu kullan.",
 							"r" : 0.62,
 							"g" : 0.62,
 							"b" : 0.62,
@@ -308,10 +308,23 @@ window = {
 					"down_image" : "d:/ymir work/ui/public/large_button_03.sub",
 				},
 				{
+					"name" : "ClaimButton",
+					"type" : "button",
+
+					"x" : 81,
+					"y" : 452,
+
+					"text" : "Odulu Al",
+
+					"default_image" : "d:/ymir work/ui/public/large_button_01.sub",
+					"over_image" : "d:/ymir work/ui/public/large_button_02.sub",
+					"down_image" : "d:/ymir work/ui/public/large_button_03.sub",
+				},
+				{
 					"name" : "CloseButton",
 					"type" : "button",
 
-					"x" : 144,
+					"x" : 146,
 					"y" : 452,
 
 					"text" : "Kapat",
