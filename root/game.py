@@ -2292,7 +2292,7 @@ class GameWindow(ui.ScriptWindow):
 		if self.interface:
 			self.interface.ToggleHuntingMissionWindow()
 
-	def __HuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim):
+	def __HuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim, fixed_payload=None, random_payload=None):
 		if self.interface:
 			self.interface.UpdateHuntingMissionData(
 				mission_index,
@@ -2303,6 +2303,8 @@ class GameWindow(ui.ScriptWindow):
 				reward_vnum,
 				reward_count,
 				can_claim,
+				fixed_payload,
+				random_payload,
 			)
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:

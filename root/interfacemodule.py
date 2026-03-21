@@ -1731,9 +1731,9 @@ class Interface(object):
 		else:
 			self.wndHuntingMission.Open()
 
-	def UpdateHuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim):
+	def UpdateHuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim, fixed_payload=None, random_payload=None):
 		if self.wndHuntingMission:
-			self.wndHuntingMission.SetHuntingMissionData(mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim)
+			self.wndHuntingMission.SetHuntingMissionData(mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim, fixed_payload, random_payload)
 
 	def ToggleMessenger(self):
 		if self.wndMessenger.IsShow():
