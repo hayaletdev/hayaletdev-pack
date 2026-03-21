@@ -2288,6 +2288,22 @@ class GameWindow(ui.ScriptWindow):
 		if self.interface:
 			self.interface.UpdateDailyQuestData(mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed)
 
+	def __OpenHuntingMissionDialog(self):
+		if self.interface:
+			self.interface.ToggleHuntingMissionWindow()
+
+	def __HuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim):
+		if self.interface:
+			self.interface.UpdateHuntingMissionData(
+				mission_index,
+				required_level,
+				mob_vnum,
+				target_count,
+				progress_count,
+				reward_vnum,
+				reward_count,
+				can_claim,
+			)
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:
 			return
@@ -2442,6 +2458,8 @@ class GameWindow(ui.ScriptWindow):
 			"CleanMissionMessage" : self.BINARY_CleanMissionMessage,
 			"OpenDailyQuestDialog" : self.__OpenDailyQuestDialog,
 			"DailyQuestData" : self.__DailyQuestData,
+			"OpenHuntingMissionDialog" : self.__OpenHuntingMissionDialog,
+			"HuntingMissionData" : self.__HuntingMissionData,
 		})
 
 		serverCommandList["OpenCostumeWindow"] = self.OpenCostumeWindow

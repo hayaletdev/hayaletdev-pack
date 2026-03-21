@@ -6,6 +6,7 @@ import osfInfo
 import systemSetting
 import wndMgr
 import chat
+import net
 import app
 import player
 import uiTaskBar
@@ -32,6 +33,7 @@ import uiSafebox
 import uiGuild
 import uiQuest
 import uidailyquest
+import uihuntingmission
 import uiPrivateShopBuilder
 import uiCommon
 import uiRefine
@@ -165,6 +167,7 @@ class Interface(object):
 		self.wndQuestWindow = {}
 		self.wndQuestWindowNewKey = 0
 		self.wndDailyQuest = None
+		self.wndHuntingMission = None
 		self.privateShopAdvertisementBoardDict = {}
 		self.guildScoreBoardDict = {}
 		self.equipmentDialogDict = {}
@@ -275,6 +278,7 @@ class Interface(object):
 			self.wndExpandedTaskBar.LoadWindow()
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DRAGON_SOUL, ui.__mem_func__(self.ToggleDragonSoulWindow))
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DAILY_QUEST, ui.__mem_func__(self.ToggleDailyQuestWindow))
+			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_HUNTING_MISSION, ui.__mem_func__(self.RequestOpenHuntingMissionWindow))
 		else:
 			self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_CHAT, ui.__mem_func__(self.ToggleChat))
 
@@ -292,6 +296,7 @@ class Interface(object):
 				self.wndInventory.SetExpandedMoneyBar(self.wndExpandedMoneyTaskBar)
 
 		self.wndDailyQuest = uidailyquest.DailyQuestWindow(self)
+		self.wndHuntingMission = uihuntingmission.HuntingMissionWindow(self)
 
 	def __MakeParty(self):
 		wndParty = uiParty.PartyWindow()
@@ -644,6 +649,7 @@ class Interface(object):
 		self.wndTaskBar.SetItemToolTip(self.tooltipItem)
 		self.wndTaskBar.SetSkillToolTip(self.tooltipSkill)
 		self.wndGuild.SetSkillToolTip(self.tooltipSkill)
+		self.wndHuntingMission.SetItemToolTip(self.tooltipItem)
 
 		if app.ENABLE_CHANGE_LOOK_SYSTEM:
 			self.wndChangeLook.SetItemToolTip(self.tooltipItem)
@@ -713,6 +719,10 @@ class Interface(object):
 		if self.wndDailyQuest:
 			self.wndDailyQuest.Destroy()
 			self.wndDailyQuest = None
+
+		if self.wndHuntingMission:
+			self.wndHuntingMission.Destroy()
+			self.wndHuntingMission = None
 
 		if self.wndChat:
 			self.wndChat.Destroy()
@@ -927,6 +937,8 @@ class Interface(object):
 		del self.wndTaskBar
 		if self.wndDailyQuest:
 			del self.wndDailyQuest
+		if self.wndHuntingMission:
+			del self.wndHuntingMission
 		if self.wndExpandedTaskBar:
 			del self.wndExpandedTaskBar
 
@@ -1099,6 +1111,8 @@ class Interface(object):
 			self.wndCharacter.RefreshQuest()
 			if self.wndDailyQuest and self.wndDailyQuest.IsShow():
 				self.wndDailyQuest.RefreshQuestList()
+			if self.wndHuntingMission and self.wndHuntingMission.IsShow():
+				self.wndHuntingMission.RefreshMissionData()
 
 	def RefreshSafebox(self):
 		self.wndSafebox.RefreshSafebox()
@@ -1707,6 +1721,19 @@ class Interface(object):
 	def UpdateDailyQuestData(self, mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed):
 		if self.wndDailyQuest:
 			self.wndDailyQuest.SetDailyQuestData(mob_vnum, target_count, progress_count, reward_vnum, reward_count, is_claimed)
+
+	def RequestOpenHuntingMissionWindow(self):
+		net.SendCommandPacket("/hunting_mission_open")
+
+	def ToggleHuntingMissionWindow(self):
+		if self.wndHuntingMission.IsShow():
+			self.wndHuntingMission.Close()
+		else:
+			self.wndHuntingMission.Open()
+
+	def UpdateHuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim):
+		if self.wndHuntingMission:
+			self.wndHuntingMission.SetHuntingMissionData(mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim)
 
 	def ToggleMessenger(self):
 		if self.wndMessenger.IsShow():
