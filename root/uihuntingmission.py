@@ -177,6 +177,10 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.progressValueText.SetText("%d / %d" % (self.progressCount, self.targetCount))
 		self.remainValueText.SetText("Kalan: %d" % max(0, self.targetCount - self.progressCount))
 
+		local_can_claim = 0
+		if self.targetCount > 0 and self.progressCount >= self.targetCount and player_level >= self.requiredLevel:
+			local_can_claim = 1
+
 		state_text = "In Progress"
 		state_color = (1.0, 0.90, 0.45)
 
@@ -186,14 +190,14 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		elif player_level < self.requiredLevel:
 			state_text = "Locked"
 			state_color = (1.0, 0.55, 0.55)
-		elif self.canClaim == 1:
+		elif self.canClaim == 1 or local_can_claim == 1:
 			state_text = "Claim Reward"
 			state_color = (0.67, 0.88, 1.0)
 
 		self.stateValueText.SetText(state_text)
 		self.stateValueText.SetFontColor(state_color[0], state_color[1], state_color[2])
 		if self.claimButton:
-			if self.canClaim == 1 and player_level >= self.requiredLevel:
+			if local_can_claim == 1:
 				self.claimButton.Enable()
 			else:
 				self.claimButton.Disable()
