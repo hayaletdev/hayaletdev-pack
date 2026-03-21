@@ -46,6 +46,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.randomRewardPayload = "0"
 		self.fixedRewards = []
 		self.randomRewards = []
+		self.isClaimPending = 0
 
 		self.__LoadWindow()
 
@@ -134,6 +135,22 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		return True
 
 	def ClaimReward(self):
+		if self.isClaimPending:
+			return
+		if not self.hasData:
+			return
+
+		player_level = player.GetStatus(player.LEVEL)
+		can_claim_now = 0
+		if self.targetCount > 0 and self.progressCount >= self.targetCount and player_level >= self.requiredLevel:
+			can_claim_now = 1
+
+		if can_claim_now != 1:
+			return
+
+		self.isClaimPending = 1
+		if self.claimButton:
+			self.claimButton.Disable()
 		net.SendCommandPacket("/hunting_mission_claim")
 
 	def SetHuntingMissionData(self, mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim, fixed_payload=None, random_payload=None):
@@ -146,6 +163,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.rewardVnum = int(reward_vnum)
 		self.rewardCount = max(0, int(reward_count))
 		self.canClaim = int(can_claim)
+		self.isClaimPending = 0
 		if fixed_payload is not None:
 			self.fixedRewardPayload = self.__NormalizeRewardPayload(fixed_payload)
 		if random_payload is not None:
@@ -218,7 +236,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.stateValueText.SetText(state_text)
 		self.stateValueText.SetFontColor(state_color[0], state_color[1], state_color[2])
 		if self.claimButton:
-			if local_can_claim == 1:
+			if local_can_claim == 1 and self.isClaimPending == 0:
 				self.claimButton.Enable()
 			else:
 				self.claimButton.Disable()
