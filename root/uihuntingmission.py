@@ -162,7 +162,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		player_level = player.GetStatus(player.LEVEL)
 
 		self.infoText.SetText("Aktif Av Gorevi: 1")
-		self.helpText.SetText("Siradaki gorev odulu alinmadan acilmaz.")
+		self.helpText.SetText("Hedef tamamlaninca odul verilir, sonra siradaki gorev acilir.")
 
 		self.indexValueText.SetText("%d" % self.missionIndex)
 		self.requiredLevelValueText.SetText("%d" % self.requiredLevel)

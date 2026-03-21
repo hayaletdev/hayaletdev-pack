@@ -286,7 +286,7 @@ window = {
 
 							"x" : 12,
 							"y" : 338,
-							"text" : "Claim Reward asamasi gorev mektubundan tamamlanir.",
+							"text" : "Odul hedef tamamlaninca otomatik verilir.",
 							"r" : 0.62,
 							"g" : 0.62,
 							"b" : 0.62,
