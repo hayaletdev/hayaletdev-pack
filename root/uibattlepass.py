@@ -1,4 +1,3 @@
-import net
 import ui
 
 
@@ -16,8 +15,6 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.stateText = None
 		self.taskLines = []
 		self.rewardLines = []
-		self.claimFreeButton = None
-		self.claimPremiumButton = None
 
 		self.seasonId = 0
 		self.isActive = 0
@@ -85,26 +82,6 @@ class BattlePassWindow(ui.ScriptWindow):
 			line.Show()
 			self.rewardLines.append(line)
 
-		self.claimFreeButton = ui.Button()
-		self.claimFreeButton.SetParent(self.board)
-		self.claimFreeButton.SetPosition(16, 418)
-		self.claimFreeButton.SetUpVisual("d:/ymir work/ui/public/large_button_01.sub")
-		self.claimFreeButton.SetOverVisual("d:/ymir work/ui/public/large_button_02.sub")
-		self.claimFreeButton.SetDownVisual("d:/ymir work/ui/public/large_button_03.sub")
-		self.claimFreeButton.SetText("Free Claim")
-		self.claimFreeButton.SetEvent(ui.__mem_func__(self.__OnClickFreeClaim))
-		self.claimFreeButton.Show()
-
-		self.claimPremiumButton = ui.Button()
-		self.claimPremiumButton.SetParent(self.board)
-		self.claimPremiumButton.SetPosition(224, 418)
-		self.claimPremiumButton.SetUpVisual("d:/ymir work/ui/public/large_button_01.sub")
-		self.claimPremiumButton.SetOverVisual("d:/ymir work/ui/public/large_button_02.sub")
-		self.claimPremiumButton.SetDownVisual("d:/ymir work/ui/public/large_button_03.sub")
-		self.claimPremiumButton.SetText("Premium Claim")
-		self.claimPremiumButton.SetEvent(ui.__mem_func__(self.__OnClickPremiumClaim))
-		self.claimPremiumButton.Show()
-
 		self.Hide()
 
 	def Destroy(self):
@@ -115,8 +92,6 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.rewardLines = []
 		self.taskData = {}
 		self.rewardData = {}
-		self.claimFreeButton = None
-		self.claimPremiumButton = None
 		self.interface = None
 
 	def SetItemToolTip(self, tooltip):
@@ -241,11 +216,3 @@ class BattlePassWindow(ui.ScriptWindow):
 				))
 			else:
 				self.rewardLines[i].SetText("-")
-
-	def __OnClickFreeClaim(self):
-		claim_level = max(1, self.level)
-		net.SendCommandPacket("/battlepass_claim %d 0" % claim_level)
-
-	def __OnClickPremiumClaim(self):
-		claim_level = max(1, self.level)
-		net.SendCommandPacket("/battlepass_claim %d 1" % claim_level)
