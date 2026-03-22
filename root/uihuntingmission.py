@@ -3,6 +3,12 @@ import net
 import nonplayer
 import player
 import ui
+import app
+
+try:
+	import modelpreviewcontroller
+except:
+	modelpreviewcontroller = None
 
 
 class HuntingMissionWindow(ui.ScriptWindow):
@@ -32,6 +38,10 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.rewardNameText = None
 		self.rewardCountText = None
 		self.rewardSlotItems = {}
+		self.previewPanel = None
+		self.modelPreview = None
+		self.modelPreviewController = None
+		self.modelPreviewIndex = 0
 
 		self.hasData = 0
 		self.missionIndex = 0
@@ -80,6 +90,10 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.rewardSlot = self.GetChild("RewardSlot")
 		self.rewardNameText = self.GetChild("RewardNameValue")
 		self.rewardCountText = self.GetChild("RewardCountValue")
+		try:
+			self.previewPanel = self.GetChild("PreviewPanel")
+		except:
+			self.previewPanel = None
 
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
 		self.claimButton.SetEvent(ui.__mem_func__(self.ClaimReward))
@@ -89,6 +103,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 			self.rewardSlot.SetOverInItemEvent(ui.__mem_func__(self.__OnOverInRewardSlot))
 			self.rewardSlot.SetOverOutItemEvent(ui.__mem_func__(self.__OnOverOutRewardSlot))
 
+		self.__CreateModelPreview()
 		self.SetCenterPosition()
 		self.Hide()
 
@@ -117,6 +132,10 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.rewardNameText = None
 		self.rewardCountText = None
 		self.rewardSlotItems = {}
+		self.__CloseModelPreview()
+		self.previewPanel = None
+		self.modelPreview = None
+		self.modelPreviewController = None
 
 	def SetItemToolTip(self, tooltip):
 		self.itemToolTip = tooltip
@@ -128,6 +147,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 
 	def Close(self):
 		self.__OnOverOutRewardSlot()
+		self.__CloseModelPreview()
 		self.Hide()
 
 	def OnPressEscapeKey(self):
@@ -202,6 +222,7 @@ class HuntingMissionWindow(ui.ScriptWindow):
 			self.__RefreshRewardSlot([])
 			if self.claimButton:
 				self.claimButton.Disable()
+			self.__RefreshModelPreview()
 			return
 
 		player_level = player.GetStatus(player.LEVEL)
@@ -275,6 +296,44 @@ class HuntingMissionWindow(ui.ScriptWindow):
 				self.missionHintText.SetText("Hedef tamamlaninca Odulu Al butonunu kullan.")
 
 		self.__RefreshRewardSlot(display_rewards)
+		self.__RefreshModelPreview()
+
+	def __GetModelPreviewIndex(self):
+		if hasattr(app, "RENDER_TARGET_INDEX_TOOLTIP_PREVIEW"):
+			return app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW
+		if hasattr(app, "RENDER_TARGET_INDEX_MYSHOPDECO"):
+			return app.RENDER_TARGET_INDEX_MYSHOPDECO
+		return 0
+
+	def __CreateModelPreview(self):
+		if not self.previewPanel:
+			return
+		if not modelpreviewcontroller:
+			return
+
+		self.modelPreviewIndex = self.__GetModelPreviewIndex()
+		self.modelPreviewController = modelpreviewcontroller.ModelPreviewController(self.modelPreviewIndex)
+
+		self.modelPreview = ui.RenderTarget()
+		self.modelPreview.SetParent(self.previewPanel)
+		self.modelPreview.SetPosition(126, 32)
+		self.modelPreview.SetSize(96, 92)
+		self.modelPreview.SetRenderTarget(self.modelPreviewIndex)
+		self.modelPreview.Show()
+
+	def __CloseModelPreview(self):
+		if self.modelPreviewController:
+			self.modelPreviewController.close()
+
+	def __RefreshModelPreview(self):
+		if not self.modelPreviewController:
+			return
+
+		if self.hasData and self.targetMobVnum > 0:
+			if not self.modelPreviewController.show_monster(self.targetMobVnum):
+				self.modelPreviewController.close()
+		else:
+			self.modelPreviewController.close()
 
 	def __RefreshRewardSlot(self, reward_list):
 		if not self.rewardSlot:
