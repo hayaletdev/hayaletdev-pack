@@ -879,6 +879,7 @@ class ItemToolTip(ToolTip):
 		self.ModelPreviewBoard = None
 		self.ModelPreview = None
 		self.ModelPreviewText = None
+		self.ModelPreviewRenderIndex = 0
 
 	def __del__(self):
 		self.__ModelPreviewClose()
@@ -2858,6 +2859,7 @@ class ItemToolTip(ToolTip):
 				RENDER_TARGET_INDEX = app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW
 			elif hasattr(app, 'RENDER_TARGET_INDEX_MYSHOPDECO'):
 				RENDER_TARGET_INDEX = app.RENDER_TARGET_INDEX_MYSHOPDECO
+		self.ModelPreviewRenderIndex = RENDER_TARGET_INDEX
 
 		if self.ModelPreviewBoard is None:
 			self.ModelPreviewBoard = ui.ThinBoard()
@@ -2906,11 +2908,7 @@ class ItemToolTip(ToolTip):
 
 	def __ModelPreviewClose(self):
 		if renderTarget:
-			renderTarget.SetVisibility(0, False)
-			if hasattr(app, 'RENDER_TARGET_INDEX_TOOLTIP_PREVIEW'):
-				renderTarget.SetVisibility(app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW, False)
-			if hasattr(app, 'RENDER_TARGET_INDEX_MYSHOPDECO'):
-				renderTarget.SetVisibility(app.RENDER_TARGET_INDEX_MYSHOPDECO, False)
+			renderTarget.SetVisibility(getattr(self, "ModelPreviewRenderIndex", 0), False)
 
 		previewBoard = getattr(self, "ModelPreviewBoard", None)
 		if previewBoard:
@@ -2926,6 +2924,7 @@ class ItemToolTip(ToolTip):
 		if previewText:
 			previewText.Hide()
 		self.ModelPreviewText = None
+		self.ModelPreviewRenderIndex = 0
 
 	def __TryRenderModelPreview(self, itemVnum, metinSlot, itemType, itemSubType, window_type, slotIndex):
 		if not renderTarget:

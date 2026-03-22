@@ -28,20 +28,27 @@ class ModelPreviewController(object):
 
 	def __init__(self, render_index=0):
 		self.render_index = render_index
+		self._last_signature = None
 
 	def set_index(self, render_index):
 		self.render_index = render_index
+		self._last_signature = None
 
 	def close(self):
 		if not renderTarget:
 			return
 		renderTarget.SetVisibility(self.render_index, False)
+		self._last_signature = None
 
-	def show_player(self, race_vnum, armor_vnum=0, weapon_vnum=0, hair_vnum=0, acce_vnum=0):
+	def show_player(self, race_vnum, armor_vnum=0, weapon_vnum=0, hair_vnum=0, acce_vnum=0, force=False):
 		if not renderTarget:
 			return False
 		if race_vnum < 0:
 			return False
+
+		signature = ("player", int(race_vnum), int(armor_vnum), int(weapon_vnum), int(hair_vnum), int(acce_vnum))
+		if not force and self._last_signature == signature:
+			return True
 
 		renderTarget.SetVisibility(self.render_index, True)
 		renderTarget.SelectModel(self.render_index, int(race_vnum))
@@ -56,17 +63,23 @@ class ModelPreviewController(object):
 			renderTarget.SetAcce(self.render_index, int(acce_vnum))
 
 		renderTarget.SetEffect(self.render_index)
+		self._last_signature = signature
 		return True
 
-	def show_monster(self, model_vnum):
+	def show_monster(self, model_vnum, force=False):
 		if not renderTarget:
 			return False
 		if not self._is_valid_monster(model_vnum):
 			return False
 
+		signature = ("monster", int(model_vnum))
+		if not force and self._last_signature == signature:
+			return True
+
 		renderTarget.SetVisibility(self.render_index, True)
 		renderTarget.SelectModel(self.render_index, int(model_vnum))
 		renderTarget.SetEffect(self.render_index)
+		self._last_signature = signature
 		return True
 
 	def resolve_mount_model(self, item_vnum, affect_list=None, value_list=None):
@@ -139,6 +152,19 @@ def default_tooltip_index():
 		return app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW
 	if hasattr(app, "RENDER_TARGET_INDEX_MYSHOPDECO"):
 		return app.RENDER_TARGET_INDEX_MYSHOPDECO
+	if hasattr(app, "RENDER_TARGET_INDEX_ILLUSTRATED"):
+		return app.RENDER_TARGET_INDEX_ILLUSTRATED
+	return 0
+
+
+def default_shared_window_index():
+	# Shared windows should avoid tooltip index to prevent UI collisions.
+	if hasattr(app, "RENDER_TARGET_INDEX_MYSHOPDECO"):
+		return app.RENDER_TARGET_INDEX_MYSHOPDECO
+	if hasattr(app, "RENDER_TARGET_INDEX_ILLUSTRATED"):
+		return app.RENDER_TARGET_INDEX_ILLUSTRATED
+	if hasattr(app, "RENDER_TARGET_INDEX_TOOLTIP_PREVIEW"):
+		return app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW
 	return 0
 
 

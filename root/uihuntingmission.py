@@ -299,8 +299,8 @@ class HuntingMissionWindow(ui.ScriptWindow):
 		self.__RefreshModelPreview()
 
 	def __GetModelPreviewIndex(self):
-		if hasattr(app, "RENDER_TARGET_INDEX_TOOLTIP_PREVIEW"):
-			return app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW
+		if modelpreviewcontroller and hasattr(modelpreviewcontroller, "default_shared_window_index"):
+			return modelpreviewcontroller.default_shared_window_index()
 		if hasattr(app, "RENDER_TARGET_INDEX_MYSHOPDECO"):
 			return app.RENDER_TARGET_INDEX_MYSHOPDECO
 		return 0
