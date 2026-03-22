@@ -232,6 +232,7 @@ class MyShopDecoration(ui.ScriptWindow):
 		PolyVnum = self.DecoObjList[idx].GetInfo()
 		self.PolyVnum = PolyVnum
 		player.SelectShopModel(PolyVnum)
+		player.MyShopDecoChangeEffect()
 
 	def SelectTitleModel(self, idx):
 		self.TitleType = idx
