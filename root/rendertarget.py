@@ -8,13 +8,19 @@ import dbg
 def _is_myshop_index(index):
 	return hasattr(app, "RENDER_TARGET_INDEX_MYSHOPDECO") and index == app.RENDER_TARGET_INDEX_MYSHOPDECO
 
+def _is_tooltip_index(index):
+	return hasattr(app, "RENDER_TARGET_INDEX_TOOLTIP_PREVIEW") and index == app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW
+
 
 def SetBackground(index, path):
 	return
 
 
 def SetVisibility(index, isVisible):
-	if _is_myshop_index(index):
+	if _is_tooltip_index(index):
+		if hasattr(player, "TooltipPreviewShow"):
+			player.TooltipPreviewShow(bool(isVisible))
+	elif _is_myshop_index(index):
 		if hasattr(player, "MyShopDecoShow"):
 			player.MyShopDecoShow(bool(isVisible))
 	else:
@@ -22,6 +28,13 @@ def SetVisibility(index, isVisible):
 
 
 def SelectModel(index, vnum):
+	if _is_tooltip_index(index):
+		if hasattr(player, "TooltipPreviewSelectModel"):
+			player.TooltipPreviewSelectModel(vnum)
+		else:
+			dbg.TraceError("RenderTarget TooltipPreviewSelectModel missing: %d" % vnum)
+		return
+
 	if _is_myshop_index(index):
 		if hasattr(player, "SelectShopModel"):
 			player.SelectShopModel(vnum)
@@ -42,27 +55,30 @@ def SelectModel(index, vnum):
 
 
 def SetHair(index, vnum):
-	if not _is_myshop_index(index):
+	if not _is_myshop_index(index) and not _is_tooltip_index(index):
 		player.IllustrationChangeHair(vnum)
 
 
 def SetArmor(index, vnum):
-	if not _is_myshop_index(index):
+	if not _is_myshop_index(index) and not _is_tooltip_index(index):
 		player.IllustrationChangeArmor(vnum)
 
 
 def SetWeapon(index, vnum):
-	if not _is_myshop_index(index):
+	if not _is_myshop_index(index) and not _is_tooltip_index(index):
 		player.IllustrationChangeWeapon(vnum)
 
 
 def SetAcce(index, vnum):
-	if not _is_myshop_index(index) and app.ENABLE_ACCE_COSTUME_SYSTEM:
+	if not _is_myshop_index(index) and not _is_tooltip_index(index) and app.ENABLE_ACCE_COSTUME_SYSTEM:
 		player.IllustrationChangeAcce(vnum)
 
 
 def SetEffect(index):
-	if _is_myshop_index(index):
+	if _is_tooltip_index(index):
+		if hasattr(player, "TooltipPreviewChangeEffect"):
+			player.TooltipPreviewChangeEffect()
+	elif _is_myshop_index(index):
 		if hasattr(player, "MyShopDecoChangeEffect"):
 			player.MyShopDecoChangeEffect()
 	else:

@@ -2853,8 +2853,11 @@ class ItemToolTip(ToolTip):
 			return
 
 		RENDER_TARGET_INDEX = 0
-		if previewType == 5 and hasattr(app, 'RENDER_TARGET_INDEX_MYSHOPDECO'):
-			RENDER_TARGET_INDEX = app.RENDER_TARGET_INDEX_MYSHOPDECO
+		if previewType == 5:
+			if hasattr(app, 'RENDER_TARGET_INDEX_TOOLTIP_PREVIEW'):
+				RENDER_TARGET_INDEX = app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW
+			elif hasattr(app, 'RENDER_TARGET_INDEX_MYSHOPDECO'):
+				RENDER_TARGET_INDEX = app.RENDER_TARGET_INDEX_MYSHOPDECO
 
 		if self.ModelPreviewBoard is None:
 			self.ModelPreviewBoard = ui.ThinBoard()
@@ -2904,6 +2907,8 @@ class ItemToolTip(ToolTip):
 	def __ModelPreviewClose(self):
 		if renderTarget:
 			renderTarget.SetVisibility(0, False)
+			if hasattr(app, 'RENDER_TARGET_INDEX_TOOLTIP_PREVIEW'):
+				renderTarget.SetVisibility(app.RENDER_TARGET_INDEX_TOOLTIP_PREVIEW, False)
 			if hasattr(app, 'RENDER_TARGET_INDEX_MYSHOPDECO'):
 				renderTarget.SetVisibility(app.RENDER_TARGET_INDEX_MYSHOPDECO, False)
 
