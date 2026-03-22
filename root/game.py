@@ -2306,6 +2306,26 @@ class GameWindow(ui.ScriptWindow):
 				fixed_payload,
 				random_payload,
 			)
+
+	def __OpenBattlePassDialog(self):
+		if self.interface:
+			self.interface.OpenBattlePassWindow()
+
+	def __BattlePassState(self, season_id, active, level, points, points_per_level, premium_active):
+		if self.interface:
+			self.interface.UpdateBattlePassState(season_id, active, level, points, points_per_level, premium_active)
+
+	def __BattlePassTask(self, task_id, category_id, task_type, target_vnum, progress, points, target_count):
+		if self.interface:
+			self.interface.UpdateBattlePassTask(task_id, category_id, task_type, target_vnum, progress, points, target_count)
+
+	def __BattlePassTaskState(self, task_id, completed):
+		if self.interface:
+			self.interface.UpdateBattlePassTaskState(task_id, completed)
+
+	def __BattlePassReward(self, level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed):
+		if self.interface:
+			self.interface.UpdateBattlePassReward(level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed)
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:
 			return
@@ -2462,6 +2482,11 @@ class GameWindow(ui.ScriptWindow):
 			"DailyQuestData" : self.__DailyQuestData,
 			"OpenHuntingMissionDialog" : self.__OpenHuntingMissionDialog,
 			"HuntingMissionData" : self.__HuntingMissionData,
+			"OpenBattlePassDialog" : self.__OpenBattlePassDialog,
+			"BattlePassState" : self.__BattlePassState,
+			"BattlePassTask" : self.__BattlePassTask,
+			"BattlePassTaskState" : self.__BattlePassTaskState,
+			"BattlePassReward" : self.__BattlePassReward,
 		})
 
 		serverCommandList["OpenCostumeWindow"] = self.OpenCostumeWindow

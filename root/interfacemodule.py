@@ -34,6 +34,7 @@ import uiGuild
 import uiQuest
 import uidailyquest
 import uihuntingmission
+import uibattlepass
 import uiPrivateShopBuilder
 import uiCommon
 import uiRefine
@@ -168,6 +169,7 @@ class Interface(object):
 		self.wndQuestWindowNewKey = 0
 		self.wndDailyQuest = None
 		self.wndHuntingMission = None
+		self.wndBattlePass = None
 		self.privateShopAdvertisementBoardDict = {}
 		self.guildScoreBoardDict = {}
 		self.equipmentDialogDict = {}
@@ -297,6 +299,7 @@ class Interface(object):
 
 		self.wndDailyQuest = uidailyquest.DailyQuestWindow(self)
 		self.wndHuntingMission = uihuntingmission.HuntingMissionWindow(self)
+		self.wndBattlePass = uibattlepass.BattlePassWindow(self)
 
 	def __MakeParty(self):
 		wndParty = uiParty.PartyWindow()
@@ -650,6 +653,7 @@ class Interface(object):
 		self.wndTaskBar.SetSkillToolTip(self.tooltipSkill)
 		self.wndGuild.SetSkillToolTip(self.tooltipSkill)
 		self.wndHuntingMission.SetItemToolTip(self.tooltipItem)
+		self.wndBattlePass.SetItemToolTip(self.tooltipItem)
 
 		if app.ENABLE_CHANGE_LOOK_SYSTEM:
 			self.wndChangeLook.SetItemToolTip(self.tooltipItem)
@@ -723,6 +727,10 @@ class Interface(object):
 		if self.wndHuntingMission:
 			self.wndHuntingMission.Destroy()
 			self.wndHuntingMission = None
+
+		if self.wndBattlePass:
+			self.wndBattlePass.Destroy()
+			self.wndBattlePass = None
 
 		if self.wndChat:
 			self.wndChat.Destroy()
@@ -939,6 +947,8 @@ class Interface(object):
 			del self.wndDailyQuest
 		if self.wndHuntingMission:
 			del self.wndHuntingMission
+		if self.wndBattlePass:
+			del self.wndBattlePass
 		if self.wndExpandedTaskBar:
 			del self.wndExpandedTaskBar
 
@@ -1113,6 +1123,8 @@ class Interface(object):
 				self.wndDailyQuest.RefreshQuestList()
 			if self.wndHuntingMission and self.wndHuntingMission.IsShow():
 				self.wndHuntingMission.RefreshMissionData()
+		if self.wndBattlePass and self.wndBattlePass.IsShow():
+			self.wndBattlePass.RefreshData()
 
 	def RefreshSafebox(self):
 		self.wndSafebox.RefreshSafebox()
@@ -1735,6 +1747,26 @@ class Interface(object):
 		if self.wndHuntingMission:
 			self.wndHuntingMission.SetHuntingMissionData(mission_index, required_level, mob_vnum, target_count, progress_count, reward_vnum, reward_count, can_claim, fixed_payload, random_payload)
 
+
+	def OpenBattlePassWindow(self):
+		if self.wndBattlePass:
+			self.wndBattlePass.Open()
+
+	def UpdateBattlePassState(self, season_id, active, level, points, points_per_level, premium_active):
+		if self.wndBattlePass:
+			self.wndBattlePass.SetBattlePassState(season_id, active, level, points, points_per_level, premium_active)
+
+	def UpdateBattlePassTask(self, task_id, category_id, task_type, target_vnum, progress, points, target_count):
+		if self.wndBattlePass:
+			self.wndBattlePass.SetTaskData(task_id, category_id, task_type, target_vnum, progress, points, target_count)
+
+	def UpdateBattlePassTaskState(self, task_id, completed):
+		if self.wndBattlePass:
+			self.wndBattlePass.SetTaskState(task_id, completed)
+
+	def UpdateBattlePassReward(self, level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed):
+		if self.wndBattlePass:
+			self.wndBattlePass.SetRewardData(level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed)
 	def ToggleMessenger(self):
 		if self.wndMessenger.IsShow():
 			self.wndMessenger.Hide()
