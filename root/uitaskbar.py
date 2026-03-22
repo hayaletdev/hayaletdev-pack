@@ -327,6 +327,7 @@ class ExpandedTaskBar(ui.ScriptWindow):
 	BUTTON_DRAGON_SOUL = 0
 	BUTTON_DAILY_QUEST = 1
 	BUTTON_HUNTING_MISSION = 2
+	BUTTON_BATTLE_PASS = 3
 
 	def __init__(self):
 		ui.Window.__init__(self)
@@ -354,6 +355,8 @@ class ExpandedTaskBar(ui.ScriptWindow):
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_DAILY_QUEST].SetParent(self)
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_HUNTING_MISSION] = self.GetChild("HuntingMissionButton")
 		self.toggleButtonDict[ExpandedTaskBar.BUTTON_HUNTING_MISSION].SetParent(self)
+		self.toggleButtonDict[ExpandedTaskBar.BUTTON_BATTLE_PASS] = self.GetChild("BattlePassButton")
+		self.toggleButtonDict[ExpandedTaskBar.BUTTON_BATTLE_PASS].SetParent(self)
 
 
 		# 버튼의 위치를 다시 조정해 주는 함수
@@ -371,6 +374,8 @@ class ExpandedTaskBar(ui.ScriptWindow):
 			button_order.append(ExpandedTaskBar.BUTTON_DAILY_QUEST)
 		if not ExpandedTaskBar.BUTTON_HUNTING_MISSION in self.exclusion_list and self.toggleButtonDict.has_key(ExpandedTaskBar.BUTTON_HUNTING_MISSION):
 			button_order.append(ExpandedTaskBar.BUTTON_HUNTING_MISSION)
+		if not ExpandedTaskBar.BUTTON_BATTLE_PASS in self.exclusion_list and self.toggleButtonDict.has_key(ExpandedTaskBar.BUTTON_BATTLE_PASS):
+			button_order.append(ExpandedTaskBar.BUTTON_BATTLE_PASS)
 
 		## 부모 window 의 position 을 다시 계산
 		total_count = len(button_order) # 정렬할 총 개수
@@ -1488,6 +1493,8 @@ class TaskBar(ui.ScriptWindow):
 	if app.ENABLE_EXPRESSING_EMOTION:
 		def RemoveQuickSlotIndex(self, iIndex):
 			pass
+
+
 
 
 

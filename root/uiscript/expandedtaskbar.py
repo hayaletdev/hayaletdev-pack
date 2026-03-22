@@ -9,7 +9,7 @@ window = {
 	"x" : SCREEN_WIDTH/2 - 5,
 	"y" : SCREEN_HEIGHT - 74,
 
-	"width" : 109,
+	"width" : 145,
 	"height" : 37,
 
 	"children" :
@@ -21,7 +21,7 @@ window = {
 			"x" : 0,
 			"y" : 0,
 
-			"width" : 109,
+			"width" : 145,
 			"height" : 37,
 
 			"children" :
@@ -53,6 +53,22 @@ window = {
 					"height" : 37,
 
 					"tooltip_text" : "Av Gorevleri",
+
+					"default_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_01.tga",
+					"over_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_02.tga",
+					"down_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_03.tga",
+				},
+				{
+					"name" : "BattlePassButton",
+					"type" : "button",
+
+					"x" : 0,
+					"y" : 0,
+
+					"width" : 37,
+					"height" : 37,
+
+					"tooltip_text" : "Battle Pass",
 
 					"default_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_01.tga",
 					"over_image" : "d:/ymir work/ui/dragonsoul/DragonSoul_Button_02.tga",
