@@ -6,6 +6,11 @@ LOCALE_PATH = "locale/common/"
 
 Y_ADD_POSITION = 0
 
+CD_FONT_NAME = "Tahoma Bold:16" # 14 yerine 12 daha dengeli durur
+CD_COLOR_R = 1.0
+CD_COLOR_G = 0.96
+CD_COLOR_B = 0.89
+CD_COLOR_A = 1.0
 window = {
 	"name" : "TaskBar",
 
@@ -420,10 +425,90 @@ window = {
 
 					"children" :
 					(
-						{ "name" : "slot_1", "type" : "image", "x" : 3, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/1.sub", },
-						{ "name" : "slot_2", "type" : "image", "x" : 35, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/2.sub", },
-						{ "name" : "slot_3", "type" : "image", "x" : 67, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/3.sub", },
-						{ "name" : "slot_4", "type" : "image", "x" : 99, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/4.sub", },
+					{
+						"name" : "slot_1",
+						"type" : "image",
+						"x" : 3,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/1.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_1_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
+					{
+						"name" : "slot_2",
+						"type" : "image",
+						"x" : 35,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/2.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_2_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
+					{
+						"name" : "slot_3",
+						"type" : "image",
+						"x" : 67,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/3.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_3_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
+					{
+						"name" : "slot_4",
+						"type" : "image",
+						"x" : 99,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/4.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_4_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
 					),
 				},
 				{
@@ -448,10 +533,90 @@ window = {
 
 					"children" :
 					(
-						{ "name" : "slot_5", "type" : "image", "x" : 3, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/f1.sub", },
-						{ "name" : "slot_6", "type" : "image", "x" : 35, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/f2.sub", },
-						{ "name" : "slot_7", "type" : "image", "x" : 67, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/f3.sub", },
-						{ "name" : "slot_8", "type" : "image", "x" : 99, "y" : 3, "image" : "d:/ymir work/ui/game/taskbar/f4.sub", },
+					{
+						"name" : "slot_5",
+						"type" : "image",
+						"x" : 3,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/f1.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_f1_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
+					{
+						"name" : "slot_6",
+						"type" : "image",
+						"x" : 35,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/f2.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_f2_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
+					{
+						"name" : "slot_7",
+						"type" : "image",
+						"x" : 67,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/f3.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_f3_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
+					{
+						"name" : "slot_8",
+						"type" : "image",
+						"x" : 99,
+						"y" : 3,
+						"image" : "d:/ymir work/ui/game/taskbar/f4.sub",
+						"children" :
+						(
+							{ 
+								"name" : "slot_f4_cd",
+								"type" : "text",
+								"x" : 0,
+								"y" : 0,
+								"horizontal_align" : "center",
+								"vertical_align" : "center",
+								"text" : "10",
+								"fontname" : CD_FONT_NAME,
+								"r" : CD_COLOR_R, "g" : CD_COLOR_G, "b" : CD_COLOR_B, "a" : CD_COLOR_A,
+							},
+						),
+					},
 					),
 				},
 				{
@@ -546,3 +711,9 @@ if app.ENABLE_CONQUEROR_LEVEL:
 			"image" : ROOT + "TaskBar/new_exp_gauge_point.sub",
 		},
 	]
+
+
+
+
+
+

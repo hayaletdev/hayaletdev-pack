@@ -547,6 +547,9 @@ class TextLine(Window):
 	def SetOutline(self, Value=True):
 		wndMgr.SetOutline(self.hWnd, Value)
 
+	def SetOutlineColor(self, color):
+		wndMgr.SetOutlineColor(self.hWnd, color)
+
 	def SetFeather(self, value=True):
 		wndMgr.SetFeather(self.hWnd, value)
 
@@ -5428,3 +5431,4 @@ if app.ENABLE_SEND_TARGET_INFO:
 
 				if self.event_func["uncheck"]:
 					apply(self.event_func["uncheck"], self.event_args["uncheck"])
+

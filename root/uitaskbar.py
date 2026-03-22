@@ -641,6 +641,17 @@ class TaskBar(ui.ScriptWindow):
 			import exception
 			exception.Abort("TaskBar.LoadWindow.LoadObject")
 
+		self.cooldownText = []
+		for slotName in ("slot_1_cd", "slot_2_cd", "slot_3_cd", "slot_4_cd", "slot_f1_cd", "slot_f2_cd", "slot_f3_cd", "slot_f4_cd"):
+			try:
+				wnd = self.GetChild(slotName)
+				wnd.SetOutline()
+				wnd.SetPackedFontColor(0xfff8f0e0)
+				wnd.SetFeather(False)
+				wnd.Hide()
+			except:
+				wnd = None
+			self.cooldownText.append(wnd)
 		self.quickslot = []
 		self.quickslot.append(self.GetChild("quick_slot_1"))
 		self.quickslot.append(self.GetChild("quick_slot_2"))
@@ -1310,6 +1321,28 @@ class TaskBar(ui.ScriptWindow):
 		else:
 			self.tooltipEXP.Hide()
 
+		startNumber = 0
+		for slot in self.quickslot:
+			for i in xrange(4):
+				slotNumber = i+startNumber
+				(Type, Position) = player.GetLocalQuickSlot(slotNumber)
+				cooldownWnd = self.cooldownText[slotNumber]
+				if player.IsSkillCoolTime(Position) and player.SLOT_TYPE_SKILL == Type:
+					(coolTime, elapsedTime) = player.GetSkillCoolTime(Position)
+					slot.SetSlotCoolTime(slotNumber, coolTime, elapsedTime)
+
+					cooldownDelay = 0
+					cooldown = int(coolTime-elapsedTime+cooldownDelay)
+					if cooldownWnd:
+						cooldownWnd.SetOutline()
+						cooldownWnd.SetText("%d" % cooldown)
+						cooldownStr = str(cooldown)
+						cooldownWnd.SetPosition((7, 2, -1)[len(cooldownStr) - 1], 0)
+						cooldownWnd.Show()
+				else:
+					if cooldownWnd:
+						cooldownWnd.Hide()
+			startNumber += 4
 	if app.ENABLE_HELP_RENEWAL:
 		def LeftMouseButtonIsShow(self):
 			wndMouseButtonMode = self.mouseModeButtonList[self.MOUSE_BUTTON_LEFT]
@@ -1455,3 +1488,8 @@ class TaskBar(ui.ScriptWindow):
 	if app.ENABLE_EXPRESSING_EMOTION:
 		def RemoveQuickSlotIndex(self, iIndex):
 			pass
+
+
+
+
+
