@@ -1,6 +1,6 @@
+import app
 import net
 import nonplayer
-import app
 import ui
 
 try:
@@ -10,13 +10,16 @@ except:
 
 
 class BattlePassWindow(ui.ScriptWindow):
-	MAX_TASK_LINES = 8
+	MAX_TASK_LINES = 7
+	CATEGORY_PVM = 0
+	CATEGORY_GENERAL = 1
 
 	def __init__(self, interface):
 		ui.ScriptWindow.__init__(self)
 
 		self.interface = interface
 		self.isLoaded = 0
+		self.itemToolTip = None
 
 		self.board = None
 		self.leftPanel = None
@@ -25,13 +28,19 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.levelText = None
 		self.pointText = None
 		self.statusText = None
+		self.categoryText = None
 		self.detailTitleText = None
 		self.detailProgressText = None
 		self.bonusLine1 = None
 		self.bonusLine2 = None
 		self.bonusLine3 = None
-		self.freeClaimButton = None
-		self.premiumClaimButton = None
+		self.claimButton = None
+		self.tabPvmButton = None
+		self.tabGeneralButton = None
+		self.tabHintText = None
+		self.rewardSlot = None
+		self.rewardNameText = None
+		self.rewardCountText = None
 
 		self.modelPreview = None
 		self.modelPreviewController = None
@@ -39,14 +48,12 @@ class BattlePassWindow(ui.ScriptWindow):
 
 		self.taskRows = []
 		self.taskData = {}
-		self.rewardData = {}
 
 		self.seasonId = 0
 		self.isActive = 0
-		self.level = 0
-		self.points = 0
-		self.pointsPerLevel = 100
-		self.premiumActive = 0
+		self.completedCount = 0
+		self.totalCount = 0
+		self.currentCategory = self.CATEGORY_PVM
 		self.selectedTaskId = 0
 
 		self.__LoadWindow()
@@ -70,17 +77,28 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.levelText = self.GetChild("LevelText")
 		self.pointText = self.GetChild("PointText")
 		self.statusText = self.GetChild("StatusText")
+		self.categoryText = self.GetChild("CategoryText")
 		self.detailTitleText = self.GetChild("DetailTitleText")
 		self.detailProgressText = self.GetChild("DetailProgressText")
 		self.bonusLine1 = self.GetChild("BonusLine1")
 		self.bonusLine2 = self.GetChild("BonusLine2")
 		self.bonusLine3 = self.GetChild("BonusLine3")
-		self.freeClaimButton = self.GetChild("FreeClaimButton")
-		self.premiumClaimButton = self.GetChild("PremiumClaimButton")
+		self.claimButton = self.GetChild("ClaimButton")
+		self.tabPvmButton = self.GetChild("TabPvmButton")
+		self.tabGeneralButton = self.GetChild("TabGeneralButton")
+		self.tabHintText = self.GetChild("TabHintText")
+		self.rewardSlot = self.GetChild("RewardSlot")
+		self.rewardNameText = self.GetChild("RewardNameText")
+		self.rewardCountText = self.GetChild("RewardCountText")
 
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
-		self.freeClaimButton.SetEvent(ui.__mem_func__(self.__OnClickFreeClaim))
-		self.premiumClaimButton.SetEvent(ui.__mem_func__(self.__OnClickPremiumClaim))
+		self.claimButton.SetEvent(ui.__mem_func__(self.__OnClickClaim))
+		self.tabPvmButton.SetEvent(ui.__mem_func__(self.__OnClickTabPvm))
+		self.tabGeneralButton.SetEvent(ui.__mem_func__(self.__OnClickTabGeneral))
+
+		if self.rewardSlot:
+			self.rewardSlot.SetOverInItemEvent(ui.__mem_func__(self.__OnOverInRewardSlot))
+			self.rewardSlot.SetOverOutItemEvent(ui.__mem_func__(self.__OnOverOutRewardSlot))
 
 		self.__CreateTaskRows()
 		self.__CreateModelPreview()
@@ -93,6 +111,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.__CloseModelPreview()
 
 		self.interface = None
+		self.itemToolTip = None
 		self.board = None
 		self.leftPanel = None
 		self.previewPanel = None
@@ -100,21 +119,26 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.levelText = None
 		self.pointText = None
 		self.statusText = None
+		self.categoryText = None
 		self.detailTitleText = None
 		self.detailProgressText = None
 		self.bonusLine1 = None
 		self.bonusLine2 = None
 		self.bonusLine3 = None
-		self.freeClaimButton = None
-		self.premiumClaimButton = None
+		self.claimButton = None
+		self.tabPvmButton = None
+		self.tabGeneralButton = None
+		self.tabHintText = None
+		self.rewardSlot = None
+		self.rewardNameText = None
+		self.rewardCountText = None
 		self.modelPreview = None
 		self.modelPreviewController = None
 		self.taskRows = []
 		self.taskData = {}
-		self.rewardData = {}
 
 	def SetItemToolTip(self, tooltip):
-		return
+		self.itemToolTip = tooltip
 
 	def Open(self):
 		self.Show()
@@ -122,6 +146,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.RefreshData()
 
 	def Close(self):
+		self.__OnOverOutRewardSlot()
 		self.Hide()
 
 	def OnPressEscapeKey(self):
@@ -146,8 +171,8 @@ class BattlePassWindow(ui.ScriptWindow):
 
 		self.modelPreview = ui.RenderTarget()
 		self.modelPreview.SetParent(self.previewPanel)
-		self.modelPreview.SetPosition(8, 26)
-		self.modelPreview.SetSize(120, 320)
+		self.modelPreview.SetPosition(8, 24)
+		self.modelPreview.SetSize(120, 240)
 		self.modelPreview.SetRenderTarget(self.modelPreviewIndex)
 		self.modelPreview.Show()
 
@@ -155,16 +180,15 @@ class BattlePassWindow(ui.ScriptWindow):
 		if self.modelPreviewController:
 			self.modelPreviewController.close()
 
-	def __RefreshModelPreview(self):
+	def __RefreshModelPreview(self, task):
 		if not self.modelPreviewController:
 			return
 
-		task = self.__GetSelectedTask()
 		if not task:
 			self.modelPreviewController.close()
 			return
 
-		target_vnum = task.get("target_vnum", 0)
+		target_vnum = int(task.get("target_vnum", 0))
 		if target_vnum > 0:
 			if not self.modelPreviewController.show_monster(target_vnum):
 				self.modelPreviewController.close()
@@ -177,12 +201,12 @@ class BattlePassWindow(ui.ScriptWindow):
 
 		self.taskRows = []
 		for i in xrange(self.MAX_TASK_LINES):
-			row_y = 10 + (i * 44)
+			row_y = 8 + (i * 46)
 
 			row_bar = ui.Bar()
 			row_bar.SetParent(self.leftPanel)
-			row_bar.SetPosition(8, row_y)
-			row_bar.SetSize(322, 40)
+			row_bar.SetPosition(6, row_y)
+			row_bar.SetSize(328, 42)
 			row_bar.SetColor(0x55000000)
 			row_bar.Show()
 
@@ -195,52 +219,68 @@ class BattlePassWindow(ui.ScriptWindow):
 			gauge = ui.Gauge()
 			gauge.SetParent(row_bar)
 			gauge.SetPosition(8, 20)
-			gauge.MakeGauge(200, "red")
+			gauge.MakeGauge(170, "red")
 			gauge.SetPercentage(0, 1)
 			gauge.Show()
 
 			progress_line = ui.TextLine()
 			progress_line.SetParent(row_bar)
-			progress_line.SetPosition(214, 20)
+			progress_line.SetPosition(182, 20)
 			progress_line.SetText("0/0")
 			progress_line.Show()
 
-			slots_line = ui.TextLine()
-			slots_line.SetParent(row_bar)
-			slots_line.SetPosition(268, 12)
-			slots_line.SetText("[ ] [ ] [ ]")
-			slots_line.Show()
+			reward_line = ui.TextLine()
+			reward_line.SetParent(row_bar)
+			reward_line.SetPosition(224, 20)
+			reward_line.SetText("Odul:-")
+			reward_line.Show()
+
+			select_button = ui.Button()
+			select_button.SetParent(row_bar)
+			select_button.SetPosition(292, 7)
+			select_button.SetUpVisual("d:/ymir work/ui/public/slot_cover_button_01.sub")
+			select_button.SetOverVisual("d:/ymir work/ui/public/slot_cover_button_02.sub")
+			select_button.SetDownVisual("d:/ymir work/ui/public/slot_cover_button_03.sub")
+			select_button.Show()
 
 			self.taskRows.append({
 				"bar": row_bar,
 				"name": name_line,
 				"gauge": gauge,
 				"progress": progress_line,
-				"slots": slots_line,
+				"reward": reward_line,
+				"button": select_button,
+				"task_id": 0,
 			})
 
 	def SetBattlePassState(self, season_id, active, level, points, points_per_level, premium_active):
 		self.seasonId = int(season_id)
 		self.isActive = int(active)
-		self.level = int(level)
-		self.points = int(points)
-		self.pointsPerLevel = max(1, int(points_per_level))
-		self.premiumActive = int(premium_active)
+		self.completedCount = int(level)
+		self.totalCount = int(points)
 		if self.IsShow():
 			self.RefreshData()
 
 	def SetTaskData(self, task_id, category_id, task_type, target_vnum, progress, points, target_count):
 		task_id = int(task_id)
-		self.taskData[task_id] = {
-			"task_id": task_id,
-			"category_id": int(category_id),
-			"task_type": int(task_type),
-			"target_vnum": int(target_vnum),
-			"progress": max(0, int(progress)),
-			"points": max(0, int(points)),
-			"target_count": max(0, int(target_count)),
-			"completed": 0,
-		}
+		if not self.taskData.has_key(task_id):
+			self.taskData[task_id] = {}
+
+		self.taskData[task_id]["task_id"] = task_id
+		self.taskData[task_id]["category_id"] = int(category_id)
+		self.taskData[task_id]["task_type"] = int(task_type)
+		self.taskData[task_id]["target_vnum"] = int(target_vnum)
+		self.taskData[task_id]["progress"] = max(0, int(progress))
+		self.taskData[task_id]["target_count"] = max(0, int(target_count))
+
+		if not self.taskData[task_id].has_key("completed"):
+			self.taskData[task_id]["completed"] = 0
+		if not self.taskData[task_id].has_key("reward_vnum"):
+			self.taskData[task_id]["reward_vnum"] = 0
+		if not self.taskData[task_id].has_key("reward_count"):
+			self.taskData[task_id]["reward_count"] = 0
+		if not self.taskData[task_id].has_key("reward_claimed"):
+			self.taskData[task_id]["reward_claimed"] = 0
 
 		if self.selectedTaskId <= 0:
 			self.selectedTaskId = task_id
@@ -251,40 +291,30 @@ class BattlePassWindow(ui.ScriptWindow):
 	def SetTaskState(self, task_id, completed):
 		task_id = int(task_id)
 		if not self.taskData.has_key(task_id):
-			self.taskData[task_id] = {
-				"task_id": task_id,
-				"category_id": 0,
-				"task_type": 0,
-				"target_vnum": 0,
-				"progress": 0,
-				"points": 0,
-				"target_count": 0,
-				"completed": int(completed),
-			}
-		else:
-			self.taskData[task_id]["completed"] = int(completed)
+			self.taskData[task_id] = {"task_id": task_id}
+		self.taskData[task_id]["completed"] = int(completed)
 
-		if self.selectedTaskId <= 0:
-			self.selectedTaskId = task_id
+		if self.IsShow():
+			self.RefreshData()
+
+	def SetTaskReward(self, task_id, reward_vnum, reward_count, claimed):
+		task_id = int(task_id)
+		if not self.taskData.has_key(task_id):
+			self.taskData[task_id] = {"task_id": task_id}
+		self.taskData[task_id]["reward_vnum"] = int(reward_vnum)
+		self.taskData[task_id]["reward_count"] = int(reward_count)
+		self.taskData[task_id]["reward_claimed"] = int(claimed)
 
 		if self.IsShow():
 			self.RefreshData()
 
 	def SetRewardData(self, level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed):
-		self.rewardData[int(level)] = {
-			"level": int(level),
-			"free_vnum": int(free_vnum),
-			"free_count": int(free_count),
-			"premium_vnum": int(premium_vnum),
-			"premium_count": int(premium_count),
-			"free_claimed": int(free_claimed),
-			"premium_claimed": int(premium_claimed),
-		}
+		return
 
 	def __GetTaskName(self, task):
-		target_vnum = task.get("target_vnum", 0)
+		target_vnum = int(task.get("target_vnum", 0))
 		if target_vnum <= 0:
-			return "Gorev"
+			return "Gorev #%d" % int(task.get("task_id", 0))
 
 		mob_name = ""
 		try:
@@ -294,75 +324,119 @@ class BattlePassWindow(ui.ScriptWindow):
 
 		if not mob_name:
 			return "VNUM %d" % target_vnum
-
 		return mob_name
 
-	def __PickSelectedTask(self):
-		if len(self.taskData) <= 0:
+	def __GetFilteredTaskIds(self):
+		result = []
+		for task_id in self.taskData.keys():
+			task = self.taskData[task_id]
+			if int(task.get("category_id", 0)) == self.currentCategory:
+				result.append(task_id)
+		result.sort()
+		return result
+
+	def __EnsureSelectedTask(self):
+		filtered = self.__GetFilteredTaskIds()
+		if len(filtered) <= 0:
 			self.selectedTaskId = 0
 			return
 
-		if self.selectedTaskId > 0 and self.taskData.has_key(self.selectedTaskId):
+		if self.selectedTaskId > 0 and self.selectedTaskId in filtered:
 			return
 
-		task_ids = self.taskData.keys()
-		task_ids.sort()
-		self.selectedTaskId = int(task_ids[0])
+		for task_id in filtered:
+			task = self.taskData[task_id]
+			if int(task.get("reward_claimed", 0)) == 0:
+				self.selectedTaskId = task_id
+				return
 
-	def __GetSelectedTask(self):
-		self.__PickSelectedTask()
+		self.selectedTaskId = filtered[0]
+
+	def __SelectTask(self, task_id):
+		self.selectedTaskId = int(task_id)
+		self.RefreshData()
+
+	def __OnClickTabPvm(self):
+		self.currentCategory = self.CATEGORY_PVM
+		self.selectedTaskId = 0
+		self.RefreshData()
+
+	def __OnClickTabGeneral(self):
+		self.currentCategory = self.CATEGORY_GENERAL
+		self.selectedTaskId = 0
+		self.RefreshData()
+
+	def __OnClickClaim(self):
+		self.__EnsureSelectedTask()
 		if self.selectedTaskId <= 0:
-			return None
-		if not self.taskData.has_key(self.selectedTaskId):
-			return None
-		return self.taskData[self.selectedTaskId]
+			return
+		net.SendCommandPacket("/battlepass_claim %d 0" % self.selectedTaskId)
 
 	def RefreshData(self):
-		self.__PickSelectedTask()
+		self.__EnsureSelectedTask()
 
 		if self.seasonText:
 			self.seasonText.SetText("Sezon: %d" % self.seasonId)
 		if self.levelText:
-			self.levelText.SetText("Level: %d" % self.level)
+			self.levelText.SetText("Tamamlanan: %d" % self.completedCount)
 		if self.pointText:
-			self.pointText.SetText("Puan: %d/%d" % (self.points, self.pointsPerLevel))
-
-		status_text = "Durum: Devam Ediyor"
-		if self.isActive <= 0:
-			status_text = "Durum: Pasif"
+			self.pointText.SetText("Toplam Gorev: %d" % self.totalCount)
 		if self.statusText:
-			self.statusText.SetText(status_text)
+			if self.isActive > 0:
+				self.statusText.SetText("Durum: Devam Ediyor")
+			else:
+				self.statusText.SetText("Durum: Pasif")
+		if self.categoryText:
+			if self.currentCategory == self.CATEGORY_PVM:
+				self.categoryText.SetText("Kategori: PVM Gorevleri")
+			else:
+				self.categoryText.SetText("Kategori: Genel Gorevler")
 
-		task_ids = self.taskData.keys()
-		task_ids.sort()
+		if self.tabHintText:
+			self.tabHintText.SetText("Sol alt butonlarla sekme degistir")
 
+		filtered = self.__GetFilteredTaskIds()
 		for i in xrange(self.MAX_TASK_LINES):
 			row = self.taskRows[i]
-			if i >= len(task_ids):
+			row["task_id"] = 0
+			if i >= len(filtered):
 				row["name"].SetText("-")
 				row["gauge"].SetPercentage(0, 1)
 				row["progress"].SetText("0/0")
-				row["slots"].SetText("[ ] [ ] [ ]")
+				row["reward"].SetText("Odul:-")
 				row["bar"].SetColor(0x55000000)
+				row["button"].Hide()
 				continue
 
-			task = self.taskData[task_ids[i]]
-			task_name = self.__GetTaskName(task)
+			task_id = filtered[i]
+			task = self.taskData[task_id]
 			progress = int(task.get("progress", 0))
 			target_count = max(1, int(task.get("target_count", 0)))
-			points = max(0, int(task.get("points", 0)))
+			reward_vnum = int(task.get("reward_vnum", 0))
+			reward_count = int(task.get("reward_count", 0))
+			reward_claimed = int(task.get("reward_claimed", 0))
 
-			row["name"].SetText(task_name)
+			row["task_id"] = task_id
+			row["name"].SetText(self.__GetTaskName(task))
 			row["gauge"].SetPercentage(progress, target_count)
 			row["progress"].SetText("%d/%d" % (progress, target_count))
-			row["slots"].SetText("+%d P" % points)
+			if reward_claimed == 1:
+				row["reward"].SetText("Odul: Alindi")
+			else:
+				row["reward"].SetText("Odul: %d x%d" % (reward_vnum, reward_count))
 
-			if task_ids[i] == self.selectedTaskId:
+			if task_id == self.selectedTaskId:
 				row["bar"].SetColor(0x88301010)
 			else:
 				row["bar"].SetColor(0x55000000)
 
-		selected = self.__GetSelectedTask()
+			row["button"].Show()
+			row["button"].SetEvent(lambda arg_task_id=task_id: self.__SelectTask(arg_task_id))
+
+		selected = None
+		if self.selectedTaskId > 0 and self.taskData.has_key(self.selectedTaskId):
+			selected = self.taskData[self.selectedTaskId]
+
 		if not selected:
 			if self.detailTitleText:
 				self.detailTitleText.SetText("Gorev Detayi")
@@ -374,55 +448,82 @@ class BattlePassWindow(ui.ScriptWindow):
 				self.bonusLine2.SetText("-")
 			if self.bonusLine3:
 				self.bonusLine3.SetText("-")
-			self.__RefreshModelPreview()
+			self.__RefreshRewardSlot(0, 0)
+			self.__RefreshModelPreview(None)
+			self.claimButton.Disable()
 			return
 
 		progress = int(selected.get("progress", 0))
 		target_count = max(1, int(selected.get("target_count", 0)))
-		points = max(0, int(selected.get("points", 0)))
-		completed = int(selected.get("completed", 0))
+		reward_vnum = int(selected.get("reward_vnum", 0))
+		reward_count = int(selected.get("reward_count", 0))
+		reward_claimed = int(selected.get("reward_claimed", 0))
 
 		if self.detailTitleText:
 			self.detailTitleText.SetText(self.__GetTaskName(selected))
 		if self.detailProgressText:
 			self.detailProgressText.SetText("Ilerleme: %d/%d" % (progress, target_count))
-
 		if self.bonusLine1:
-			if completed == 1:
+			if progress >= target_count:
 				self.bonusLine1.SetText("- Durum: Tamamlandi")
 			else:
 				self.bonusLine1.SetText("- Durum: Devam Ediyor")
 		if self.bonusLine2:
-			self.bonusLine2.SetText("- Gorev Puani: +%d" % points)
+			if reward_claimed == 1:
+				self.bonusLine2.SetText("- Odul Durumu: Alindi")
+			else:
+				self.bonusLine2.SetText("- Odul Durumu: Bekliyor")
 		if self.bonusLine3:
-			if self.premiumActive > 0:
-				self.bonusLine3.SetText("- Premium Hat: Acik")
-			else:
-				self.bonusLine3.SetText("- Premium Hat: Kapali")
+			self.bonusLine3.SetText("- Gorev ID: %d" % int(selected.get("task_id", 0)))
 
-		self.__RefreshModelPreview()
+		self.__RefreshRewardSlot(reward_vnum, reward_count)
+		self.__RefreshModelPreview(selected)
 
-	def __FindClaimLevel(self, premium_track):
-		reward_levels = self.rewardData.keys()
-		reward_levels.sort()
-		for level in reward_levels:
-			reward = self.rewardData[level]
-			if level > self.level:
-				continue
-			if premium_track:
-				if reward["premium_claimed"] == 0:
-					return level
-			else:
-				if reward["free_claimed"] == 0:
-					return level
-		return max(1, self.level)
+		if self.rewardNameText:
+			self.rewardNameText.SetText("Odul VNUM: %d" % reward_vnum)
+		if self.rewardCountText:
+			self.rewardCountText.SetText("x%d" % reward_count)
 
-	def __OnClickFreeClaim(self):
-		claim_level = self.__FindClaimLevel(False)
-		net.SendCommandPacket("/battlepass_claim %d 0" % claim_level)
+		if progress >= target_count and reward_claimed == 0:
+			self.claimButton.Enable()
+		else:
+			self.claimButton.Disable()
 
-	def __OnClickPremiumClaim(self):
-		claim_level = self.__FindClaimLevel(True)
-		net.SendCommandPacket("/battlepass_claim %d 1" % claim_level)
+	def __RefreshRewardSlot(self, reward_vnum, reward_count):
+		if not self.rewardSlot:
+			return
+		self.rewardSlot.ClearSlot(0)
+		if reward_vnum > 0 and reward_count > 0:
+			self.rewardSlot.SetItemSlot(0, reward_vnum, reward_count)
+		self.rewardSlot.RefreshSlot()
 
+	def __OnOverInRewardSlot(self, slot_index):
+		if slot_index != 0:
+			return
+		if not self.itemToolTip and self.interface:
+			try:
+				self.itemToolTip = self.interface.tooltipItem
+			except:
+				self.itemToolTip = None
+		if not self.itemToolTip:
+			return
 
+		selected = None
+		if self.selectedTaskId > 0 and self.taskData.has_key(self.selectedTaskId):
+			selected = self.taskData[self.selectedTaskId]
+		if not selected:
+			return
+
+		reward_vnum = int(selected.get("reward_vnum", 0))
+		if reward_vnum <= 0:
+			return
+
+		import player
+		metin_slot = [0 for i in xrange(player.METIN_SOCKET_MAX_NUM)]
+		attr_slot = [(0, 0) for i in xrange(player.ATTRIBUTE_SLOT_MAX_NUM)]
+		self.itemToolTip.ClearToolTip()
+		self.itemToolTip.AddItemData(reward_vnum, metin_slot, attr_slot)
+
+	def __OnOverOutRewardSlot(self):
+		if self.itemToolTip:
+			self.itemToolTip.HideToolTip()

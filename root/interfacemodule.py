@@ -1771,6 +1771,11 @@ class Interface(object):
 	def UpdateBattlePassReward(self, level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed):
 		if self.wndBattlePass:
 			self.wndBattlePass.SetRewardData(level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed)
+
+	def UpdateBattlePassTaskReward(self, task_id, reward_vnum, reward_count, claimed):
+		if self.wndBattlePass:
+			self.wndBattlePass.SetTaskReward(task_id, reward_vnum, reward_count, claimed)
+
 	def ToggleMessenger(self):
 		if self.wndMessenger.IsShow():
 			self.wndMessenger.Hide()
@@ -3348,5 +3353,7 @@ if __name__ == "__main__":
 	game.Show()
 
 	app.Loop()
+
+
 
 

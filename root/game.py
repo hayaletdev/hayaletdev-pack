@@ -2323,9 +2323,9 @@ class GameWindow(ui.ScriptWindow):
 		if self.interface:
 			self.interface.UpdateBattlePassTaskState(task_id, completed)
 
-	def __BattlePassReward(self, level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed):
+	def __BattlePassTaskReward(self, task_id, reward_vnum, reward_count, claimed):
 		if self.interface:
-			self.interface.UpdateBattlePassReward(level, free_vnum, free_count, premium_vnum, premium_count, free_claimed, premium_claimed)
+			self.interface.UpdateBattlePassTaskReward(task_id, reward_vnum, reward_count, claimed)
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:
 			return
@@ -2486,7 +2486,7 @@ class GameWindow(ui.ScriptWindow):
 			"BattlePassState" : self.__BattlePassState,
 			"BattlePassTask" : self.__BattlePassTask,
 			"BattlePassTaskState" : self.__BattlePassTaskState,
-			"BattlePassReward" : self.__BattlePassReward,
+			"BattlePassTaskReward" : self.__BattlePassTaskReward,
 		})
 
 		serverCommandList["OpenCostumeWindow"] = self.OpenCostumeWindow
@@ -3210,3 +3210,5 @@ class GameWindow(ui.ScriptWindow):
 
 		def FlowerEventProcess(self, type, data = None):
 			self.interface.FlowerEventProcess(type, data)
+
+
