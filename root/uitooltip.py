@@ -18,6 +18,17 @@ import ui
 import mouseModule
 import constInfo
 import osfInfo
+try:
+	import mountpreviewmap
+except:
+	mountpreviewmap = None
+try:
+	import renderTarget
+except:
+	try:
+		import rendertarget as renderTarget
+	except:
+		renderTarget = None
 
 if app.ENABLE_DRAGON_SOUL_SYSTEM and app.ENABLE_DS_SET:
 	import uiDragonSoul
@@ -865,7 +876,12 @@ class ItemToolTip(ToolTip):
 		# 아이템 툴팁을 표시할 때 현재 캐릭터가 착용할 수 없는 아이템이라면 강제로 Disable Color로 설정 (이미 그렇게 작동하고 있으나 꺼야 할 필요가 있어서)
 		self.bCannotUseItemForceSetDisableColor = True 
 
+		self.ModelPreviewBoard = None
+		self.ModelPreview = None
+		self.ModelPreviewText = None
+
 	def __del__(self):
+		self.__ModelPreviewClose()
 		ToolTip.__del__(self)
 		self.metinSlot = None
 		self.attrSlot = None
@@ -937,6 +953,7 @@ class ItemToolTip(ToolTip):
 		return ToolTip.AppendTextLine(self, text, color, centerAlign)
 
 	def ClearToolTip(self):
+		self.__ModelPreviewClose()
 		self.isShopItem = False
 		if app.ENABLE_PRIVATESHOP_SEARCH_SYSTEM:
 			self.isPrivateSearchItem = False
@@ -944,6 +961,10 @@ class ItemToolTip(ToolTip):
 			self.isRefineElementItem = False
 		self.toolTipWidth = self.TOOL_TIP_WIDTH
 		ToolTip.ClearToolTip(self)
+
+	def HideToolTip(self):
+		self.__ModelPreviewClose()
+		ToolTip.HideToolTip(self)
 
 	def SetInventoryItem(self, slotIndex, window_type = player.INVENTORY):
 		if app.ENABLE_DS_SET:
@@ -1902,6 +1923,7 @@ class ItemToolTip(ToolTip):
 		self.itemVnum = itemVnum
 		self.metinSlot = metinSlot
 		self.attrSlot = attrSlot
+		self.__ModelPreviewClose()
 
 		item.SelectItem(itemVnum)
 		itemType = item.GetItemType()
@@ -1994,6 +2016,8 @@ class ItemToolTip(ToolTip):
 			self.__SetItemTitle(itemVnum, metinSlot, attrSlot, set_value)
 		else:
 			self.__SetItemTitle(itemVnum, metinSlot, attrSlot)
+
+		self.__TryRenderModelPreview(itemVnum, metinSlot, itemType, itemSubType, window_type, slotIndex)
 
 		### Hair Preview Image ###
 		if self.__IsHair(itemVnum):
@@ -2711,6 +2735,241 @@ class ItemToolTip(ToolTip):
 			self.toolTipHeight += itemImage.GetHeight()
 			self.childrenList.append(itemImage)
 			self.ResizeToolTip()
+
+	def __ItemGetRace(self):
+		race = -1
+
+		try:
+			race = int(player.GetRace())
+		except:
+			pass
+
+		if race >= 0:
+			return race
+
+		try:
+			mainVID = player.GetMainCharacterIndex()
+			if mainVID:
+				race = int(chr.GetRace(mainVID))
+				if race >= 0:
+					return race
+		except:
+			pass
+
+		return 0
+
+	def __IsValidMonsterRace(self, vnum):
+		try:
+			ivnum = int(vnum)
+		except:
+			return False
+
+		if ivnum <= 0:
+			return False
+
+		try:
+			name = nonplayer.GetMonsterName(ivnum)
+			if name:
+				return True
+		except:
+			pass
+
+		return False
+
+	def __GetPreviewModelFromValues(self, values):
+		for value in values:
+			try:
+				ivalue = int(value)
+			except:
+				continue
+
+			if ivalue >= 10000 and ivalue < 1000000 and self.__IsValidMonsterRace(ivalue):
+				return ivalue
+
+		return 0
+
+	def __GetMountModelVnum(self):
+		# 1) Primary source: APPLY_MOUNT from runtime affects.
+		for affectIndex in xrange(4):
+			try:
+				affectType, affectValue = item.GetAffect(affectIndex)
+				affectValue = int(affectValue)
+			except:
+				continue
+
+			if affectValue <= 0:
+				continue
+
+			if hasattr(item, "APPLY_MOUNT") and affectType == item.APPLY_MOUNT:
+				return affectValue
+
+		# 2) Fallback source: static item->model map generated from item_proto.
+		try:
+			itemVnum = int(getattr(self, "itemVnum", 0))
+		except:
+			itemVnum = 0
+
+		if itemVnum > 0 and mountpreviewmap and hasattr(mountpreviewmap, "MOUNT_ITEM_TO_MODEL"):
+			modelVnum = mountpreviewmap.MOUNT_ITEM_TO_MODEL.get(itemVnum, 0)
+			if modelVnum > 0:
+				return modelVnum
+
+		# 3) Last fallback: scan value/socket-like fields, but ignore obvious duration values.
+		values = [item.GetValue(i) for i in xrange(6)]
+		for value in values:
+			try:
+				ivalue = int(value)
+			except:
+				continue
+
+			if ivalue >= 20000 and ivalue < 40000:
+				return ivalue
+
+		return 0
+
+	def __GetPetModelVnum(self):
+		for i in xrange(6):
+			try:
+				modelVnum = int(item.GetValue(i))
+			except:
+				continue
+
+			if modelVnum >= 10000 and modelVnum < 1000000 and self.__IsValidMonsterRace(modelVnum):
+				return modelVnum
+
+		return 0
+
+
+	def __ModelPreview(self, itemVnum, previewType, modelVnum):
+		if not renderTarget:
+			return
+
+		if hasattr(constInfo, "DISABLE_MODEL_PREVIEW") and constInfo.DISABLE_MODEL_PREVIEW == 1:
+			return
+
+		if modelVnum < 0:
+			return
+		if previewType == 5 and modelVnum <= 0:
+			return
+
+		RENDER_TARGET_INDEX = 0
+		if previewType == 5 and hasattr(app, 'RENDER_TARGET_INDEX_MYSHOPDECO'):
+			RENDER_TARGET_INDEX = app.RENDER_TARGET_INDEX_MYSHOPDECO
+
+		if self.ModelPreviewBoard is None:
+			self.ModelPreviewBoard = ui.ThinBoard()
+			self.ModelPreviewBoard.SetParent(self)
+			self.ModelPreviewBoard.SetSize(200, 240)
+			self.ModelPreviewBoard.SetPosition(-210, 0)
+			self.ModelPreviewBoard.Show()
+
+			self.ModelPreview = ui.RenderTarget()
+			self.ModelPreview.SetParent(self.ModelPreviewBoard)
+			self.ModelPreview.SetSize(190, 210)
+			self.ModelPreview.SetPosition(5, 22)
+			self.ModelPreview.SetRenderTarget(RENDER_TARGET_INDEX)
+			self.ModelPreview.Show()
+
+			self.ModelPreviewText = ui.TextLine()
+			self.ModelPreviewText.SetParent(self.ModelPreviewBoard)
+			self.ModelPreviewText.SetFontName(self.defFontName)
+			self.ModelPreviewText.SetPackedFontColor(grp.GenerateColor(0.8824, 0.9804, 0.8824, 1.0))
+			self.ModelPreviewText.SetPosition(0, 5)
+			self.ModelPreviewText.SetText("Model Preview")
+			self.ModelPreviewText.SetOutline()
+			self.ModelPreviewText.SetFeather(False)
+			self.ModelPreviewText.SetWindowHorizontalAlignCenter()
+			self.ModelPreviewText.SetHorizontalAlignCenter()
+			self.ModelPreviewText.Show()
+		else:
+			self.ModelPreview.SetRenderTarget(RENDER_TARGET_INDEX)
+			self.ModelPreviewBoard.Show()
+			self.ModelPreview.Show()
+			self.ModelPreviewText.Show()
+
+		renderTarget.SetVisibility(RENDER_TARGET_INDEX, True)
+		renderTarget.SelectModel(RENDER_TARGET_INDEX, modelVnum)
+
+		if previewType == 1:
+			renderTarget.SetHair(RENDER_TARGET_INDEX, itemVnum)
+		elif previewType == 2:
+			renderTarget.SetArmor(RENDER_TARGET_INDEX, itemVnum)
+		elif previewType == 3:
+			renderTarget.SetWeapon(RENDER_TARGET_INDEX, itemVnum)
+		elif previewType == 4:
+			renderTarget.SetAcce(RENDER_TARGET_INDEX, itemVnum)
+
+		renderTarget.SetEffect(RENDER_TARGET_INDEX)
+
+	def __ModelPreviewClose(self):
+		if renderTarget:
+			renderTarget.SetVisibility(0, False)
+			if hasattr(app, 'RENDER_TARGET_INDEX_MYSHOPDECO'):
+				renderTarget.SetVisibility(app.RENDER_TARGET_INDEX_MYSHOPDECO, False)
+
+		previewBoard = getattr(self, "ModelPreviewBoard", None)
+		if previewBoard:
+			previewBoard.Hide()
+		self.ModelPreviewBoard = None
+
+		preview = getattr(self, "ModelPreview", None)
+		if preview:
+			preview.Hide()
+		self.ModelPreview = None
+
+		previewText = getattr(self, "ModelPreviewText", None)
+		if previewText:
+			previewText.Hide()
+		self.ModelPreviewText = None
+
+	def __TryRenderModelPreview(self, itemVnum, metinSlot, itemType, itemSubType, window_type, slotIndex):
+		if not renderTarget:
+			return
+
+		race = self.__ItemGetRace()
+
+		if itemType == item.ITEM_TYPE_ARMOR:
+			if itemSubType == item.ARMOR_BODY:
+				self.__ModelPreview(itemVnum, 2, race)
+			return
+
+		if itemType == item.ITEM_TYPE_WEAPON:
+			self.__ModelPreview(itemVnum, 3, race)
+			return
+
+		if itemType == item.ITEM_TYPE_COSTUME:
+			if itemSubType == item.COSTUME_TYPE_BODY:
+				self.__ModelPreview(itemVnum, 2, race)
+			elif itemSubType == item.COSTUME_TYPE_HAIR or (hasattr(item, 'COSTUME_TYPE_HEAD') and itemSubType == item.COSTUME_TYPE_HEAD):
+				hairVnum = item.GetValue(3)
+				if hairVnum <= 0:
+					hairVnum = itemVnum
+				self.__ModelPreview(hairVnum, 1, race)
+			elif app.ENABLE_WEAPON_COSTUME_SYSTEM and itemSubType == item.COSTUME_TYPE_WEAPON:
+				self.__ModelPreview(itemVnum, 3, race)
+			elif app.ENABLE_ACCE_COSTUME_SYSTEM and itemSubType == item.COSTUME_TYPE_ACCE:
+				self.__ModelPreview(itemVnum, 4, race)
+			elif app.ENABLE_MOUNT_COSTUME_SYSTEM and itemSubType == item.COSTUME_TYPE_MOUNT:
+				modelVnum = self.__GetMountModelVnum()
+				if modelVnum <= 0:
+					# Fallback for proto variants where mount model is not exported via GetAffect.
+					values = [item.GetValue(i) for i in xrange(6)]
+					if metinSlot:
+						values += metinSlot
+					modelVnum = self.__GetPreviewModelFromValues(values)
+				if modelVnum > 0:
+					self.__ModelPreview(itemVnum, 5, modelVnum)
+			return
+
+		if hasattr(item, 'ITEM_TYPE_PET') and hasattr(item, 'PET_PAY') and itemType == item.ITEM_TYPE_PET and itemSubType == item.PET_PAY:
+			modelVnum = self.__GetPetModelVnum()
+			if modelVnum <= 0:
+				values = [item.GetValue(i) for i in xrange(6)]
+				if metinSlot:
+					values += metinSlot
+				modelVnum = self.__GetPreviewModelFromValues(values)
+			if modelVnum > 0:
+				self.__ModelPreview(itemVnum, 5, modelVnum)
 
 	def ResizeToolTipWidth(self, width):
 		self.toolTipWidth = width
