@@ -281,6 +281,7 @@ class Interface(object):
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DRAGON_SOUL, ui.__mem_func__(self.ToggleDragonSoulWindow))
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_DAILY_QUEST, ui.__mem_func__(self.ToggleDailyQuestWindow))
 			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_HUNTING_MISSION, ui.__mem_func__(self.RequestOpenHuntingMissionWindow))
+			self.wndExpandedTaskBar.SetToggleButtonEvent(uiTaskBar.ExpandedTaskBar.BUTTON_BATTLE_PASS, ui.__mem_func__(self.RequestOpenBattlePassWindow))
 		else:
 			self.wndTaskBar.SetToggleButtonEvent(uiTaskBar.TaskBar.BUTTON_CHAT, ui.__mem_func__(self.ToggleChat))
 
@@ -1736,6 +1737,9 @@ class Interface(object):
 
 	def RequestOpenHuntingMissionWindow(self):
 		net.SendCommandPacket("/hunting_mission_open")
+
+	def RequestOpenBattlePassWindow(self):
+		net.SendCommandPacket("/battlepass_open")
 
 	def ToggleHuntingMissionWindow(self):
 		if self.wndHuntingMission.IsShow():
@@ -3344,3 +3348,5 @@ if __name__ == "__main__":
 	game.Show()
 
 	app.Loop()
+
+
