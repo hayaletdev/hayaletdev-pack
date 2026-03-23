@@ -330,6 +330,8 @@ class BattlePassWindow(ui.ScriptWindow):
 		if task_type == 3:
 			if task_arg == 1:
 				return "Baek-Go Aura Uret"
+			if task_arg == 20018:
+				return "Baek-Go Uretim Yap"
 			return "Craft Gorevi"
 
 		target_vnum = int(task.get("target_vnum", 0))
