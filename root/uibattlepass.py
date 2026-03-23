@@ -11,7 +11,7 @@ except:
 
 
 class BattlePassWindow(ui.ScriptWindow):
-	MAX_TASK_LINES = 6
+	MAX_TASK_LINES = 5
 	CATEGORY_PVM = 0
 	CATEGORY_GENERAL = 1
 
@@ -49,6 +49,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.modelPreviewIndex = 0
 
 		self.taskRows = []
+		self.taskScrollBar = None
 		self.taskData = {}
 
 		self.seasonId = 0
@@ -58,6 +59,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.premiumActive = 0
 		self.currentCategory = self.CATEGORY_PVM
 		self.selectedTaskId = 0
+		self.taskScrollPos = 0
 
 		self.__LoadWindow()
 
@@ -107,6 +109,7 @@ class BattlePassWindow(ui.ScriptWindow):
 			self.rewardSlot.SetOverOutItemEvent(ui.__mem_func__(self.__OnOverOutRewardSlot))
 
 		self.__CreateTaskRows()
+		self.__CreateTaskScrollBar()
 		self.__CreateModelPreview()
 		self.SetCenterPosition()
 		self.Hide()
@@ -117,6 +120,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.interface = None
 		self.itemToolTip = None
 		self.taskRows = []
+		self.taskScrollBar = None
 		self.taskData = {}
 
 	def SetItemToolTip(self, tooltip):
@@ -232,6 +236,25 @@ class BattlePassWindow(ui.ScriptWindow):
 				"task_id": 0,
 			})
 
+	def __CreateTaskScrollBar(self):
+		if not self.leftPanel:
+			return
+
+		self.taskScrollBar = ui.ScrollBar()
+		self.taskScrollBar.SetParent(self.leftPanel)
+		self.taskScrollBar.SetPosition(320, 62)
+		self.taskScrollBar.SetScrollBarSize(230)
+		self.taskScrollBar.SetScrollEvent(ui.__mem_func__(self.__OnTaskScroll))
+		self.taskScrollBar.SetMiddleBarSize(1.0)
+		self.taskScrollBar.SetPos(0.0)
+		self.taskScrollBar.Hide()
+
+	def __OnTaskScroll(self):
+		if not self.taskScrollBar:
+			return
+		self.taskScrollPos = self.taskScrollBar.GetPos()
+		self.RefreshData()
+
 	def SetBattlePassState(self, season_id, active, level, points, points_per_level, premium_active):
 		self.seasonId = int(season_id)
 		self.isActive = int(active)
@@ -299,6 +322,16 @@ class BattlePassWindow(ui.ScriptWindow):
 		return
 
 	def __GetTaskName(self, task):
+		task_type = int(task.get("task_type", 0))
+		task_arg = int(task.get("target_vnum", 0))
+
+		if task_type == 2:
+			return "Sohbet Mesaji Gonder"
+		if task_type == 3:
+			if task_arg == 1:
+				return "Baek-Go Aura Uret"
+			return "Craft Gorevi"
+
 		target_vnum = int(task.get("target_vnum", 0))
 		if target_vnum <= 0:
 			return "Gorev #%d" % int(task.get("task_id", 0))
@@ -359,11 +392,17 @@ class BattlePassWindow(ui.ScriptWindow):
 	def __OnClickTabPvm(self):
 		self.currentCategory = self.CATEGORY_PVM
 		self.selectedTaskId = 0
+		self.taskScrollPos = 0.0
+		if self.taskScrollBar:
+			self.taskScrollBar.SetPos(0.0, False)
 		self.RefreshData()
 
 	def __OnClickTabGeneral(self):
 		self.currentCategory = self.CATEGORY_GENERAL
 		self.selectedTaskId = 0
+		self.taskScrollPos = 0.0
+		if self.taskScrollBar:
+			self.taskScrollBar.SetPos(0.0, False)
 		self.RefreshData()
 
 	def __OnClickClaimFree(self):
@@ -399,10 +438,28 @@ class BattlePassWindow(ui.ScriptWindow):
 			self.tabHintText.SetText("Premium: Kapali")
 
 		filtered = self.__GetFilteredTaskIds()
+		start_index = 0
+		filtered_count = len(filtered)
+
+		if self.taskScrollBar:
+			if filtered_count > self.MAX_TASK_LINES:
+				max_start = filtered_count - self.MAX_TASK_LINES
+				self.taskScrollBar.SetMiddleBarSize(float(self.MAX_TASK_LINES) / float(filtered_count))
+				if max_start > 0:
+					self.taskScrollBar.SetScrollStep(1.0 / float(max_start))
+				self.taskScrollBar.Show()
+				scroll_pos = self.taskScrollBar.GetPos()
+				start_index = int(scroll_pos * max_start)
+			else:
+				self.taskScrollBar.Hide()
+				self.taskScrollBar.SetPos(0.0, False)
+				self.taskScrollPos = 0.0
+
 		for i in xrange(self.MAX_TASK_LINES):
 			row = self.taskRows[i]
 			row["task_id"] = 0
-			if i >= len(filtered):
+			data_index = start_index + i
+			if data_index >= filtered_count:
 				row["name"].SetText("-")
 				row["gauge"].SetPercentage(0, 1)
 				row["progress"].SetText("0/0")
@@ -411,7 +468,7 @@ class BattlePassWindow(ui.ScriptWindow):
 				row["button"].Hide()
 				continue
 
-			task_id = filtered[i]
+			task_id = filtered[data_index]
 			task = self.taskData[task_id]
 			progress = int(task.get("progress", 0))
 			target_count = max(1, int(task.get("target_count", 0)))
@@ -499,6 +556,20 @@ class BattlePassWindow(ui.ScriptWindow):
 			self.premiumClaimButton.Enable()
 		else:
 			self.premiumClaimButton.Disable()
+
+	def OnRunMouseWheel(self, nLen):
+		if not self.IsShow() or not self.taskScrollBar or not self.taskScrollBar.IsShow():
+			return False
+		if not self.leftPanel or not self.leftPanel.IsIn():
+			return False
+
+		cur_pos = self.taskScrollBar.GetPos()
+		step = self.taskScrollBar.GetScrollStep()
+		if nLen > 0:
+			self.taskScrollBar.SetPos(cur_pos - step)
+		else:
+			self.taskScrollBar.SetPos(cur_pos + step)
+		return True
 
 	def __RefreshRewardSlot(self, reward_vnum, reward_count):
 		if not self.rewardSlot:
