@@ -11,7 +11,7 @@ except:
 
 
 class BattlePassWindow(ui.ScriptWindow):
-	MAX_TASK_LINES = 7
+	MAX_TASK_LINES = 6
 	CATEGORY_PVM = 0
 	CATEGORY_GENERAL = 1
 
@@ -36,6 +36,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.bonusLine2 = None
 		self.bonusLine3 = None
 		self.claimButton = None
+		self.premiumClaimButton = None
 		self.tabPvmButton = None
 		self.tabGeneralButton = None
 		self.tabHintText = None
@@ -54,6 +55,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.isActive = 0
 		self.completedCount = 0
 		self.totalCount = 0
+		self.premiumActive = 0
 		self.currentCategory = self.CATEGORY_PVM
 		self.selectedTaskId = 0
 
@@ -84,6 +86,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.bonusLine2 = self.GetChild("BonusLine2")
 		self.bonusLine3 = self.GetChild("BonusLine3")
 		self.claimButton = self.GetChild("ClaimButton")
+		self.premiumClaimButton = self.GetChild("PremiumClaimButton")
 		self.tabPvmButton = self.GetChild("TabPvmButton")
 		self.tabGeneralButton = self.GetChild("TabGeneralButton")
 		self.tabHintText = self.GetChild("TabHintText")
@@ -92,7 +95,8 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.rewardCountText = self.GetChild("RewardCountText")
 
 		self.board.SetCloseEvent(ui.__mem_func__(self.Close))
-		self.claimButton.SetEvent(ui.__mem_func__(self.__OnClickClaim))
+		self.claimButton.SetEvent(ui.__mem_func__(self.__OnClickClaimFree))
+		self.premiumClaimButton.SetEvent(ui.__mem_func__(self.__OnClickClaimPremium))
 		self.tabPvmButton.SetEvent(ui.__mem_func__(self.__OnClickTabPvm))
 		self.tabGeneralButton.SetEvent(ui.__mem_func__(self.__OnClickTabGeneral))
 		self.tabPvmButton.SetText("PvM")
@@ -175,7 +179,7 @@ class BattlePassWindow(ui.ScriptWindow):
 
 		self.taskRows = []
 		for i in xrange(self.MAX_TASK_LINES):
-			row_y = 8 + (i * 46)
+			row_y = 62 + (i * 46)
 
 			row_bar = ui.Bar()
 			row_bar.SetParent(self.leftPanel)
@@ -233,6 +237,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.isActive = int(active)
 		self.completedCount = int(level)
 		self.totalCount = int(points)
+		self.premiumActive = int(premium_active)
 		if self.IsShow():
 			self.RefreshData()
 
@@ -256,6 +261,12 @@ class BattlePassWindow(ui.ScriptWindow):
 			task["reward_count"] = 0
 		if not task.has_key("reward_claimed"):
 			task["reward_claimed"] = 0
+		if not task.has_key("premium_vnum"):
+			task["premium_vnum"] = 0
+		if not task.has_key("premium_count"):
+			task["premium_count"] = 0
+		if not task.has_key("premium_claimed"):
+			task["premium_claimed"] = 0
 
 		if self.selectedTaskId <= 0:
 			self.selectedTaskId = task_id
@@ -270,7 +281,7 @@ class BattlePassWindow(ui.ScriptWindow):
 		if self.IsShow():
 			self.RefreshData()
 
-	def SetTaskReward(self, task_id, reward_vnum, reward_count, claimed):
+	def SetTaskReward(self, task_id, reward_vnum, reward_count, claimed, premium_vnum=0, premium_count=0, premium_claimed=0):
 		task_id = int(task_id)
 		if not self.taskData.has_key(task_id):
 			self.taskData[task_id] = {"task_id": task_id}
@@ -278,6 +289,9 @@ class BattlePassWindow(ui.ScriptWindow):
 		task["reward_vnum"] = int(reward_vnum)
 		task["reward_count"] = int(reward_count)
 		task["reward_claimed"] = int(claimed)
+		task["premium_vnum"] = int(premium_vnum)
+		task["premium_count"] = int(premium_count)
+		task["premium_claimed"] = int(premium_claimed)
 		if self.IsShow():
 			self.RefreshData()
 
@@ -309,6 +323,12 @@ class BattlePassWindow(ui.ScriptWindow):
 			return "VNUM %d" % item_vnum
 		return name
 
+	def __ShortText(self, text_value, max_len):
+		text_value = str(text_value)
+		if len(text_value) <= max_len:
+			return text_value
+		return text_value[:max_len-3] + "..."
+
 	def __GetFilteredTaskIds(self):
 		result = []
 		for task_id in self.taskData.keys():
@@ -326,7 +346,8 @@ class BattlePassWindow(ui.ScriptWindow):
 			return
 
 		for task_id in filtered:
-			if int(self.taskData[task_id].get("reward_claimed", 0)) == 0:
+			task = self.taskData[task_id]
+			if int(task.get("reward_claimed", 0)) == 0 or int(task.get("premium_claimed", 0)) == 0:
 				self.selectedTaskId = task_id
 				return
 		self.selectedTaskId = filtered[0]
@@ -345,11 +366,17 @@ class BattlePassWindow(ui.ScriptWindow):
 		self.selectedTaskId = 0
 		self.RefreshData()
 
-	def __OnClickClaim(self):
+	def __OnClickClaimFree(self):
 		self.__EnsureSelectedTask()
 		if self.selectedTaskId <= 0:
 			return
 		net.SendCommandPacket("/battlepass_claim %d 0" % self.selectedTaskId)
+
+	def __OnClickClaimPremium(self):
+		self.__EnsureSelectedTask()
+		if self.selectedTaskId <= 0:
+			return
+		net.SendCommandPacket("/battlepass_claim %d 1" % self.selectedTaskId)
 
 	def RefreshData(self):
 		self.__EnsureSelectedTask()
@@ -365,7 +392,11 @@ class BattlePassWindow(ui.ScriptWindow):
 			self.categoryText.SetText("Kategori: PVM Gorevleri")
 		else:
 			self.categoryText.SetText("Kategori: Genel Gorevler")
-		self.tabHintText.SetText("Sol alttan sekme degistir")
+
+		if self.premiumActive > 0:
+			self.tabHintText.SetText("Premium: Acik")
+		else:
+			self.tabHintText.SetText("Premium: Kapali")
 
 		filtered = self.__GetFilteredTaskIds()
 		for i in xrange(self.MAX_TASK_LINES):
@@ -389,13 +420,13 @@ class BattlePassWindow(ui.ScriptWindow):
 			reward_claimed = int(task.get("reward_claimed", 0))
 
 			row["task_id"] = task_id
-			row["name"].SetText(self.__GetTaskName(task))
+			row["name"].SetText(self.__ShortText(self.__GetTaskName(task), 21))
 			row["gauge"].SetPercentage(progress, target_count)
 			row["progress"].SetText("%d/%d" % (progress, target_count))
 			if reward_claimed == 1:
-				row["reward"].SetText("Odul: Alindi")
+				row["reward"].SetText("Free: Alindi")
 			else:
-				row["reward"].SetText("%s x%d" % (self.__GetItemName(reward_vnum), reward_count))
+				row["reward"].SetText("%s x%d" % (self.__ShortText(self.__GetItemName(reward_vnum), 10), reward_count))
 
 			if task_id == self.selectedTaskId:
 				row["bar"].SetColor(0x99301010)
@@ -420,6 +451,7 @@ class BattlePassWindow(ui.ScriptWindow):
 			self.__RefreshRewardSlot(0, 0)
 			self.__RefreshModelPreview(None)
 			self.claimButton.Disable()
+			self.premiumClaimButton.Disable()
 			return
 
 		progress = int(selected.get("progress", 0))
@@ -427,6 +459,9 @@ class BattlePassWindow(ui.ScriptWindow):
 		reward_vnum = int(selected.get("reward_vnum", 0))
 		reward_count = int(selected.get("reward_count", 0))
 		reward_claimed = int(selected.get("reward_claimed", 0))
+		premium_vnum = int(selected.get("premium_vnum", 0))
+		premium_count = int(selected.get("premium_count", 0))
+		premium_claimed = int(selected.get("premium_claimed", 0))
 
 		self.detailTitleText.SetText(self.__GetTaskName(selected))
 		self.detailProgressText.SetText("Ilerleme: %d/%d" % (progress, target_count))
@@ -435,13 +470,23 @@ class BattlePassWindow(ui.ScriptWindow):
 		else:
 			self.bonusLine1.SetText("- Durum: Devam Ediyor")
 		if reward_claimed == 1:
-			self.bonusLine2.SetText("- Odul Durumu: Alindi")
+			self.bonusLine2.SetText("- Free Odul: Alindi")
 		else:
-			self.bonusLine2.SetText("- Odul Durumu: Bekliyor")
-		self.bonusLine3.SetText("- Gorev ID: %d" % int(selected.get("task_id", 0)))
+			self.bonusLine2.SetText("- Free Odul: Bekliyor")
 
-		self.rewardNameText.SetText("Odul: %s" % self.__GetItemName(reward_vnum))
-		self.rewardCountText.SetText("x%d" % reward_count)
+		if self.premiumActive <= 0:
+			self.bonusLine3.SetText("- Premium: Pasif")
+		elif premium_claimed == 1:
+			self.bonusLine3.SetText("- Premium Odul: Alindi")
+		else:
+			self.bonusLine3.SetText("- Premium Odul: Bekliyor")
+
+		self.rewardNameText.SetText("Free: %s" % self.__ShortText(self.__GetItemName(reward_vnum), 18))
+		if self.premiumActive > 0:
+			self.rewardCountText.SetText("F:%dx  P:%dx" % (reward_count, premium_count))
+		else:
+			self.rewardCountText.SetText("x%d" % reward_count)
+
 		self.__RefreshRewardSlot(reward_vnum, reward_count)
 		self.__RefreshModelPreview(selected)
 
@@ -449,6 +494,11 @@ class BattlePassWindow(ui.ScriptWindow):
 			self.claimButton.Enable()
 		else:
 			self.claimButton.Disable()
+
+		if self.premiumActive > 0 and progress >= target_count and premium_claimed == 0:
+			self.premiumClaimButton.Enable()
+		else:
+			self.premiumClaimButton.Disable()
 
 	def __RefreshRewardSlot(self, reward_vnum, reward_count):
 		if not self.rewardSlot:

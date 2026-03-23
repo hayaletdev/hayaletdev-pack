@@ -2323,9 +2323,9 @@ class GameWindow(ui.ScriptWindow):
 		if self.interface:
 			self.interface.UpdateBattlePassTaskState(task_id, completed)
 
-	def __BattlePassTaskReward(self, task_id, reward_vnum, reward_count, claimed):
+	def __BattlePassTaskReward(self, task_id, reward_vnum, reward_count, claimed, premium_vnum=0, premium_count=0, premium_claimed=0):
 		if self.interface:
-			self.interface.UpdateBattlePassTaskReward(task_id, reward_vnum, reward_count, claimed)
+			self.interface.UpdateBattlePassTaskReward(task_id, reward_vnum, reward_count, claimed, premium_vnum, premium_count, premium_claimed)
 	def BINARY_AppendNotifyMessage(self, type):
 		if not type in localeInfo.NOTIFY_MESSAGE:
 			return
@@ -3210,5 +3210,6 @@ class GameWindow(ui.ScriptWindow):
 
 		def FlowerEventProcess(self, type, data = None):
 			self.interface.FlowerEventProcess(type, data)
+
 
 
