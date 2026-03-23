@@ -3,6 +3,7 @@ import item
 import net
 import nonplayer
 import ui
+import battlepassconfig
 
 try:
 	import modelpreviewcontroller
@@ -325,15 +326,12 @@ class BattlePassWindow(ui.ScriptWindow):
 		task_type = int(task.get("task_type", 0))
 		task_arg = int(task.get("target_vnum", 0))
 
-		if task_type == 2:
-			return "Sohbet Mesaji Gonder"
+		if battlepassconfig.TASK_TYPE_NAMES.has_key(task_type):
+			return battlepassconfig.TASK_TYPE_NAMES[task_type]
+
 		if task_type == 3:
-			if task_arg == 0:
-				return "Herhangi Bir Uretim Yap"
-			if task_arg == 1:
-				return "Baek-Go Aura Uret"
-			if task_arg == 20018:
-				return "Baek-Go Uretim Yap"
+			if battlepassconfig.CRAFT_ARGS.has_key(task_arg):
+				return battlepassconfig.CRAFT_ARGS[task_arg]
 			return "Craft Gorevi"
 
 		target_vnum = int(task.get("target_vnum", 0))
