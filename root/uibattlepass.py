@@ -328,6 +328,8 @@ class BattlePassWindow(ui.ScriptWindow):
 		if task_type == 2:
 			return "Sohbet Mesaji Gonder"
 		if task_type == 3:
+			if task_arg == 0:
+				return "Herhangi Bir Uretim Yap"
 			if task_arg == 1:
 				return "Baek-Go Aura Uret"
 			if task_arg == 20018:
