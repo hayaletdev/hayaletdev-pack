@@ -330,6 +330,9 @@ class BattlePassWindow(ui.ScriptWindow):
 			return battlepassconfig.TASK_TYPE_NAMES[task_type]
 
 		if task_type == 3:
+			if task_arg >= battlepassconfig.CRAFT_ITEM_ARG_BASE:
+				crafted_vnum = task_arg - battlepassconfig.CRAFT_ITEM_ARG_BASE
+				return "%s Uret" % self.__ShortText(self.__GetItemName(crafted_vnum), 14)
 			if battlepassconfig.CRAFT_ARGS.has_key(task_arg):
 				return battlepassconfig.CRAFT_ARGS[task_arg]
 			return "Craft Gorevi"

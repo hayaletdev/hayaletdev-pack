@@ -1,3 +1,5 @@
+CRAFT_ITEM_ARG_BASE = 1000000
+
 CRAFT_ARGS = {
 	0: "Herhangi Bir Uretim Yap",
 	1: "Aura Uret",
